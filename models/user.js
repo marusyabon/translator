@@ -20,6 +20,6 @@ UserSchema.set('toJSON', {
 	}
 });
 
-const User = mongoose.model('Contact', UserSchema);
+const User = mongoose.model('User', UserSchema);
 
-mongoose.model('user', User);
+module.exports = User

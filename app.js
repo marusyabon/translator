@@ -1,11 +1,12 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const bodyParser = require('body-parser');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
 
 const mongoose = require('mongoose');
 
@@ -13,7 +14,9 @@ mongoose.connect('mongodb://localhost:27017/translatorDB', { useNewUrlParser: tr
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-var app = express();
+const app = express();
+
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'public'));
@@ -26,14 +29,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Configuring Passport
-var passport = require('passport');
-var expressSession = require('express-session');
+const passport = require('passport');
+const expressSession = require('express-session');
 app.use(expressSession({secret: 'mySecretKey'}));
 app.use(passport.initialize());
 app.use(passport.session());
 
 // Initialize Passport
-var initPassport = require('./passport/init');
+const initPassport = require('./passport/init');
 initPassport(passport);
 
 // Routers
