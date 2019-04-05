@@ -16,14 +16,10 @@ export default class RegisterPage extends JetView{
 							view: "button", value: "Register", type: "form",
 							click: () => {
 								const values = $$("reg_form").getValues();
-
+ 
 								webix.ajax().post('http://localhost:3000/signup', values, function (response) {
 									webix.message(response);
-								});
-
-								if(response) {
-									this.show('/home');
-								}								
+								});						
 							} 
 						}
 					]
