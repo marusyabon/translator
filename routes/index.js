@@ -1,60 +1,93 @@
-const express = require('express');
-const router = express.Router();
+const mongoose = require('mongoose');
+const passport = require('passport');
+const router = require('express').Router();
+const auth = require('./auth');
+const Users = mongoose.model('Users');
 
-const isAuthenticated = function (req, res, next) {
-	// if user is authenticated in the session, call the next() to call the next request handler 
-	// Passport adds this method to request object. A middleware is allowed to add properties to
-	// request and response objects
-	if (req.isAuthenticated())
-		return next();
-	// if the user is not authenticated then redirect him to the login page
-	res.redirect('/');
-}
+//POST new user route (optional, everyone has access)
+router.post('/register', auth.optional, (req, res, next) => {
+	const user = req.body;
 
-module.exports = function(passport){
+	if (!user.email) {
+		return res.status(422).json({
+			errors: {
+				email: 'is required',
+			},
+		});
+	}
 
-	/* GET login page. */
-	router.get('/', function(req, res) {
-    	// Display the Login page with any flash message, if any
-		res.render('index', { message: req.flash('message') });
-	});
+	if (!user.password) {
+		return res.status(422).json({
+			errors: {
+				password: 'is required',
+			},
+		});
+	}
 
-	/* Handle Login POST */
-	router.post('/login', passport.authenticate('login', {
-		successRedirect: '/home',
-		failureRedirect: '/',
-		failureFlash : true  
-	}));
+	const finalUser = new Users(user);
 
-	/* GET Registration Page */
-	router.get('/signup', function(req, res){
-		res.render('register',{message: req.flash('message')});
-	});
+	finalUser.setPassword(user.password);
 
-	/* Handle Registration POST */
-	router.post('/signup', 
-		passport.authenticate('local', {
-			successRedirect: '/home',
-			// failureRedirect: '/signup',
-			// failureFlash : true  
-		}),
-		function(req, res) {
-			console.log(req, res);
-			res.send(res.json());
-			// res.send();
-		}
-	);
+	return finalUser.save()
+		.then(() => res.json({ user: finalUser.toAuthJSON() }));
+});
 
-	/* GET Home Page */
-	router.get('/home', isAuthenticated, function(req, res){
-		res.render('home', { user: req.user });
-	});
+//POST login route (optional, everyone has access)
+router.post('/login', auth.optional, (req, res, next) => {
+	const user = req.body;
 
-	/* Handle Logout */
-	router.get('/signout', function(req, res) {
-		req.logout();
-		res.redirect('/');
-	});
+	if (!user.email) {
+		return res.status(422).json({
+			errors: {
+				email: 'is required',
+			},
+		});
+	}
 
-	return router;
-}
+	if (!user.password) {
+		return res.status(422).json({
+			errors: {
+				password: 'is required',
+			},
+		});
+	}
+
+	return passport.authenticate('local', { 
+			session: false 
+		}, 
+		
+		(err, passportUser, info) => {
+
+			if (err) {
+				return next(err);
+			}
+
+			if (passportUser) {
+				const user = passportUser;
+				user.token = passportUser.generateJWT();
+
+				return res.json({ user: user.toAuthJSON() });
+			}
+
+			return res.status(400).json(info);
+
+		})(req, res, () => {
+			res.status(200).send('Success');
+		});
+});
+
+//GET current route (required, only authenticated users have access)
+router.get('/home', auth.required, (req, res, next) => {
+	const { payload: { id } } = req;
+
+	return Users.findById(id)
+		.then((user) => {
+			if (!user) {
+				return res.sendStatus(400);
+			}
+
+			return res.json({ user: user.toAuthJSON() });
+		});
+});
+
+module.exports = router;

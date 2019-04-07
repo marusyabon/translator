@@ -8,7 +8,7 @@ export default class IndexPage extends JetView{
 			id: "log_form",
 			width: 300,
 			elements: [
-				{ view: "text", label: "Email", name: "username" },
+				{ view: "text", label: "Email", name: "email" },
 				{ view: "text", type: "password", label: "Password", name: "password" },
 				{
 					margin: 5, cols: [
@@ -18,7 +18,9 @@ export default class IndexPage extends JetView{
 								const values = $$("log_form").getValues();
 
 								webix.ajax().post('http://localhost:3000/login', values, function (response) {
-									webix.message(response);
+									if(response) {
+										app.show("/home/start");
+									}
 								});					
 							} 
 						},

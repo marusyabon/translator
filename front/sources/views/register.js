@@ -8,7 +8,7 @@ export default class RegisterPage extends JetView{
 			id: "reg_form",
 			width: 300,
 			elements: [
-				{ view: "text", label: "Email", name: "username" },
+				{ view: "text", label: "Email", name: "email" },
 				{ view: "text", type: "password", label: "Password", name: "password" },
 				{
 					margin: 5, cols: [
@@ -16,9 +16,12 @@ export default class RegisterPage extends JetView{
 							view: "button", value: "Register", type: "form",
 							click: () => {
 								const values = $$("reg_form").getValues();
+								const app = this.app;
  
-								webix.ajax().post('http://localhost:3000/signup', values, function (response) {
-									webix.message(response);
+								webix.ajax().post('http://localhost:3000/register', values, function (response) {
+									if(response) {
+										app.show("/home/start");
+									}
 								});						
 							} 
 						}
