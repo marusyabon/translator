@@ -16,8 +16,12 @@ export default class IndexPage extends JetView{
 							view: "button", value: "Login", type: "form",
 							click: () => {
 								const values = $$("log_form").getValues();
+								const user = {
+									user: values
+								};
+								const app = this.app;
 
-								webix.ajax().post('http://localhost:3000/login', values, function (response) {
+								webix.ajax().post('http://localhost:3000/login', user, function (response) {
 									if(response) {
 										app.show("/home/start");
 									}

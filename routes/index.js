@@ -6,8 +6,8 @@ const Users = mongoose.model('Users');
 
 //POST new user route (optional, everyone has access)
 router.post('/register', auth.optional, (req, res, next) => {
-	const user = req.body;
-
+	const user = JSON.parse(req.body.user);
+	
 	if (!user.email) {
 		return res.status(422).json({
 			errors: {
@@ -34,7 +34,7 @@ router.post('/register', auth.optional, (req, res, next) => {
 
 //POST login route (optional, everyone has access)
 router.post('/login', auth.optional, (req, res, next) => {
-	const user = req.body;
+	const user = JSON.parse(req.body.user);
 
 	if (!user.email) {
 		return res.status(422).json({
@@ -53,27 +53,29 @@ router.post('/login', auth.optional, (req, res, next) => {
 	}
 
 	return passport.authenticate('local', { 
-			session: false 
-		}, 
+		session: false 
+	}, 
 		
-		(err, passportUser, info) => {
+	(err, passportUser, info) => {
 
-			if (err) {
-				return next(err);
-			}
+	console.log(passportUser);
 
-			if (passportUser) {
-				const user = passportUser;
-				user.token = passportUser.generateJWT();
+		if (err) {
+			return next(err);
+		}
 
-				return res.json({ user: user.toAuthJSON() });
-			}
+		if (passportUser) {
+			const user = passportUser;
+			user.token = passportUser.generateJWT();
 
-			return res.status(400).json(info);
+			return res.json({ user: user.toAuthJSON() });
+		}
 
-		})(req, res, () => {
-			res.status(200).send('Success');
-		});
+		return res.status(400).json(info);
+
+	})(req, res, () => {
+		res.status(200).send('Success');
+	});
 });
 
 //GET current route (required, only authenticated users have access)

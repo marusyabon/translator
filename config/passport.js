@@ -9,9 +9,11 @@ passport.use(new LocalStrategy({
 	passwordField: 'user[password]',
 }, 
 (email, password, done) => {
-	Users.findOne({ email })
+	const u_email = JSON.parse(email);
+	const u_pass = JSON.parse(password);
+	Users.findOne({ email: u_email.email })
 		.then((user) => {
-			if (!user || !user.validatePassword(password)) {
+			if (!user || !user.validatePassword(u_pass.password)) {
 				return done(null, false, { errors: { 'email or password': 'is invalid' } });
 			}
 

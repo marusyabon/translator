@@ -39,7 +39,7 @@ app.use(require('./routes'));
 //Error handlers & middlewares
 if(!isProduction) {
 	app.use((err, req, res) => {
-		console.log(res)
+
 		res.status(err.status || 500);
 
 		res.json({
