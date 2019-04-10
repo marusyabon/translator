@@ -35,6 +35,7 @@ router.post('/register', auth.optional, (req, res, next) => {
 //POST login route (optional, everyone has access)
 router.post('/login', auth.optional, (req, res, next) => {
 	const user = JSON.parse(req.body.user);
+	// console.log(req.headers);
 
 	if (!user.email) {
 		return res.status(422).json({
@@ -67,7 +68,8 @@ router.post('/login', auth.optional, (req, res, next) => {
 		if (passportUser) {
 			const user = passportUser;
 			user.token = passportUser.generateJWT();
-
+			// res.cookie('jwt', user.token);
+			res.header('authorization', user.token);
 			return res.json({ user: user.toAuthJSON() });
 		}
 
@@ -80,6 +82,7 @@ router.post('/login', auth.optional, (req, res, next) => {
 
 //GET current route (required, only authenticated users have access)
 router.get('/home', auth.required, (req, res, next) => {
+
 	const { payload: { id } } = req;
 
 	return Users.findById(id)
@@ -90,6 +93,22 @@ router.get('/home', auth.required, (req, res, next) => {
 
 			return res.json({ user: user.toAuthJSON() });
 		});
+});
+
+router.post('/home', auth.optional, (req, res, next) => {
+	console.log(req.headers);
+	console.log(req.body);
+
+	// const { payload: { id } } = req;
+
+	// return Users.findById(id)
+	// 	.then((user) => {
+	// 		if (!user) {
+	// 			return res.sendStatus(400);
+	// 		}
+
+	// 		return res.json({ user: user.toAuthJSON() });
+	// 	});
 });
 
 module.exports = router;

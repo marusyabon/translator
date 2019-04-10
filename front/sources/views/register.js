@@ -15,7 +15,7 @@ export default class RegisterPage extends JetView{
 						{ 
 							view: "button", value: "Register", type: "form",
 							click: () => {
-								const values = $$("log_form").getValues();
+								const values = $$("reg_form").getValues();
 								const user = {
 									user: values
 								};
