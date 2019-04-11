@@ -21,7 +21,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({ secret: 'some-random-pass', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
 
 // view engine setup
-app.set('views', path.join(__dirname, 'public'));
+app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 mongoose.connect('mongodb://localhost:27017/translatorDB', { useNewUrlParser: true });

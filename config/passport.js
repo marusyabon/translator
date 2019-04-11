@@ -16,7 +16,7 @@ passport.use(new LocalStrategy({
 			if (!user || !user.validatePassword(u_pass.password)) {
 				return done(null, false, { errors: { 'email or password': 'is invalid' } });
 			}
-
+			
 			return done(null, user);
 		}).catch(done);
 }));

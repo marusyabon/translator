@@ -58,8 +58,6 @@ router.post('/login', auth.optional, (req, res, next) => {
 		
 	(err, passportUser, info) => {
 
-	console.log(passportUser);
-
 		if (err) {
 			return next(err);
 		}
@@ -67,7 +65,7 @@ router.post('/login', auth.optional, (req, res, next) => {
 		if (passportUser) {
 			const user = passportUser;
 			user.token = passportUser.generateJWT();
-
+			res.cookie('jwt', user.token);
 			return res.json({ user: user.toAuthJSON() });
 		}
 
