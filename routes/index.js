@@ -25,17 +25,18 @@ router.post('/register', auth.optional, (req, res, next) => {
 	}
 
 	const finalUser = new Users(user);
+	const token = finalUser.toAuthJSON();
 
 	finalUser.setPassword(user.password);
+	finalUser.token =  token;
 
 	return finalUser.save()
-		.then(() => res.json({ user: finalUser.toAuthJSON() }));
+		.then(() => res.json({ user: token }));
 });
 
 //POST login route (optional, everyone has access)
 router.post('/login', auth.optional, (req, res, next) => {
 	const user = JSON.parse(req.body.user);
-	// console.log(req.headers);
 
 	if (!user.email) {
 		return res.status(422).json({
@@ -58,8 +59,6 @@ router.post('/login', auth.optional, (req, res, next) => {
 	}, 
 		
 	(err, passportUser, info) => {
-
-	console.log(passportUser);
 
 		if (err) {
 			return next(err);
@@ -96,9 +95,21 @@ router.get('/home', auth.required, (req, res, next) => {
 });
 
 router.post('/home', auth.optional, (req, res, next) => {
-	console.log(req.headers);
-	console.log(req.body);
+	const token = req.headers.authorization;
 
+	Users.findOne({token: token}, function(err, user) {
+        if (err) {
+            res.json({
+                type: false,
+                data: "Error occured: " + err
+            });
+        } else {
+            res.json({
+                type: true,
+                data: user
+            });
+        }
+    });
 	// const { payload: { id } } = req;
 
 	// return Users.findById(id)

@@ -39,7 +39,9 @@ export default class TopView extends JetView{
 	
 	urlChange() {
 		const token = webix.storage.session.get('token');
-		webix.ajax().post('http://localhost:3000/home', token).then((response) => {
+		webix.ajax().headers({
+			"authorization":token
+		}).post('http://localhost:3000/home', token).then((response) => {
 			if(!response) {
 				app.show("/index");
 			}
