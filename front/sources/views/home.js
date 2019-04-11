@@ -4,11 +4,11 @@ import {JetView, plugins} from "webix-jet";
 
 export default class TopView extends JetView{
 	config(){
-		var header = {
+		const header = {
 			type:"header", template:this.app.config.name, css:"webix_header app_header"
 		};
 
-		var menu = {
+		const menu = {
 			view:"menu", id:"top:menu", 
 			css:"app_menu",
 			width:180, layout:"y", select:true,
@@ -20,9 +20,25 @@ export default class TopView extends JetView{
 			]
 		};
 
-		var ui = {
-			type:"clean", paddingX:5, css:"app_layout", cols:[
-				{ paddingX:5, paddingY:10, rows: [ {css:"webix_shadow_medium", rows:[header, menu]} ]},
+		const logout = {
+			view:"button", 
+			id:"logout_button", 
+			value:"Logout", 
+			type:"form", 
+			click: () => {
+				const app = this.app;
+				webix.ajax().get('http://localhost:3000/logout').then((response) => {
+					if(response) {
+						app.show("/index");
+					}
+				})
+			}
+		}
+
+		const ui = {
+			type:"clean", paddingX:5, css:"app_layout", 
+			cols:[
+				{ paddingX:5, paddingY:10, rows: [ {css:"webix_shadow_medium", rows:[header, menu, logout]} ]},
 				{ view: "resizer", width: 5 },
 				{ type:"wide", paddingY:10, paddingX:5, rows: [
 					{ $subview:true } 
@@ -38,6 +54,7 @@ export default class TopView extends JetView{
 	}
 	
 	urlChange() {
+		const app = this.app;
 		const token = webix.storage.session.get('token');
 		webix.ajax().headers({
 			"authorization":token

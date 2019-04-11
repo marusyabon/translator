@@ -3,6 +3,7 @@ const passport = require('passport');
 const router = require('express').Router();
 const auth = require('./auth');
 const Users = mongoose.model('Users');
+const logout = require('express-passport-logout');
 
 //POST new user route (optional, everyone has access)
 router.post('/register', auth.optional, (req, res, next) => {
@@ -121,5 +122,8 @@ router.post('/home', auth.optional, (req, res, next) => {
 	// 		return res.json({ user: user.toAuthJSON() });
 	// 	});
 });
+
+
+router.get('/logout', logout());
 
 module.exports = router;
