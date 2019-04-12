@@ -95,7 +95,8 @@ router.get('/home', auth.required, (req, res, next) => {
 		});
 });
 
-router.post('/home', auth.optional, (req, res, next) => {
+router.post('/home', auth.required, (req, res, next) => {
+	console.log('Payload', req.payload);
 	const token = req.headers.authorization;
 
 	Users.findOne({token: token}, function(err, user) {

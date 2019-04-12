@@ -16,5 +16,20 @@ export default class MyApp extends JetApp{
 }
 
 if (!BUILD_AS_MODULE){
-	webix.ready(() => new MyApp().render() );
+	webix.ready(() => {
+		const app = new MyApp();
+		webix.attachEvent('onBeforeAjax', (mode, url, data, request, headers) => {
+			const token = webix.storage.session.get('token');
+			headers['authorization'] = token ? `Token ${token}` : null;
+		});
+		app.attachEvent('app:guard', (url, view, nav) => {
+			// webix.ajax().get('http://localhost:3000/user').then((userStatus) => {
+			// 	if (url === '' && !userStatus.allowAccess) {
+			// 		nav.redirect = '/';
+			// 	}
+			// });
+		});
+
+		app.render();
+	});
 }
