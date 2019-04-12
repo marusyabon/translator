@@ -23,7 +23,12 @@ export default class IndexPage extends JetView{
 
 								webix.ajax().post('http://localhost:3000/login', user, function (response) {
 									if(response) {
+										const res = JSON.parse(response);
+										webix.storage.session.put('token', res.user.token);
 										app.show("/home/start");
+									}
+									else {
+										webix.message(response)
 									}
 								});					
 							} 

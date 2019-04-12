@@ -3,6 +3,7 @@ const passport = require('passport');
 const router = require('express').Router();
 const auth = require('./auth');
 const Users = mongoose.model('Users');
+const logout = require('express-passport-logout');
 
 //POST new user route (optional, everyone has access)
 router.post('/register', auth.optional, (req, res, next) => {
@@ -25,11 +26,13 @@ router.post('/register', auth.optional, (req, res, next) => {
 	}
 
 	const finalUser = new Users(user);
+	const token = finalUser.toAuthJSON();
 
 	finalUser.setPassword(user.password);
+	finalUser.token =  token;
 
 	return finalUser.save()
-		.then(() => res.json({ user: finalUser.toAuthJSON() }));
+		.then(() => res.json({ user: token }));
 });
 
 //POST login route (optional, everyone has access)
@@ -65,7 +68,8 @@ router.post('/login', auth.optional, (req, res, next) => {
 		if (passportUser) {
 			const user = passportUser;
 			user.token = passportUser.generateJWT();
-			res.cookie('jwt', user.token);
+			// res.cookie('jwt', user.token);
+			res.header('authorization', user.token);
 			return res.json({ user: user.toAuthJSON() });
 		}
 
@@ -78,6 +82,7 @@ router.post('/login', auth.optional, (req, res, next) => {
 
 //GET current route (required, only authenticated users have access)
 router.get('/home', auth.required, (req, res, next) => {
+
 	const { payload: { id } } = req;
 
 	return Users.findById(id)
@@ -89,5 +94,36 @@ router.get('/home', auth.required, (req, res, next) => {
 			return res.json({ user: user.toAuthJSON() });
 		});
 });
+
+router.post('/home', auth.optional, (req, res, next) => {
+	const token = req.headers.authorization;
+
+	Users.findOne({token: token}, function(err, user) {
+        if (err) {
+            res.json({
+                type: false,
+                data: "Error occured: " + err
+            });
+        } else {
+            res.json({
+                type: true,
+                data: user
+            });
+        }
+    });
+	// const { payload: { id } } = req;
+
+	// return Users.findById(id)
+	// 	.then((user) => {
+	// 		if (!user) {
+	// 			return res.sendStatus(400);
+	// 		}
+
+	// 		return res.json({ user: user.toAuthJSON() });
+	// 	});
+});
+
+
+router.get('/logout', logout());
 
 module.exports = router;
