@@ -3,12 +3,13 @@ const passport = require('passport');
 const router = require('express').Router();
 const auth = require('./auth');
 const Users = mongoose.model('Users');
+const Tokens = mongoose.model('Tokens');
 const logout = require('express-passport-logout');
 
 //POST new user route (optional, everyone has access)
 router.post('/register', auth.optional, (req, res, next) => {
 	const user = JSON.parse(req.body.user);
-	
+		
 	if (!user.email) {
 		return res.status(422).json({
 			errors: {
@@ -60,7 +61,7 @@ router.post('/login', auth.optional, (req, res, next) => {
 	}, 
 		
 	(err, passportUser, info) => {
-
+		
 		if (err) {
 			return next(err);
 		}
@@ -68,7 +69,6 @@ router.post('/login', auth.optional, (req, res, next) => {
 		if (passportUser) {
 			const user = passportUser;
 			user.token = passportUser.generateJWT();
-			// res.cookie('jwt', user.token);
 			res.header('authorization', user.token);
 			return res.json({ user: user.toAuthJSON() });
 		}
@@ -81,50 +81,56 @@ router.post('/login', auth.optional, (req, res, next) => {
 });
 
 //GET current route (required, only authenticated users have access)
-router.get('/home', auth.required, (req, res, next) => {
+router.get('/check', auth.required, (req, res, next) => {
 
-	const { payload: { id } } = req;
+	if (req.payload) {
+		const { payload: { id } } = req;
+		const { headers: { authorization } } = req;
 
-	return Users.findById(id)
-		.then((user) => {
-			if (!user) {
-				return res.sendStatus(400);
-			}
+		Tokens.findOne(
+			{ invalidToken: authorization }, 
+			(err, token) => {
+				if (token) {
+					return res.sendStatus(401);
+				}				
+		})	
+		
+		return Users.findById(id)
+			.then(
+				(user) => {
+					if (!user) {
+						return res.sendStatus(400);
+					}
 
-			return res.json({ user: user.toAuthJSON() });
-		});
+					else {
+						const resUser = {
+							user: user.toAuthJSON(),
+							allowAccess: true
+						};
+
+						return res.send(resUser);
+					}
+				}
+			)
+	}
+
+	return null
+
 });
 
-router.post('/home', auth.required, (req, res, next) => {
-	console.log('Payload', req.payload);
+router.get('/logout', (req, res) => {
 	const token = req.headers.authorization;
+	const currentDate = new Date();
+	const invalidToken = new Tokens({
+		invalidToken: token,
+		currentDate: currentDate
+	});
 
-	Users.findOne({token: token}, function(err, user) {
-        if (err) {
-            res.json({
-                type: false,
-                data: "Error occured: " + err
-            });
-        } else {
-            res.json({
-                type: true,
-                data: user
-            });
-        }
-    });
-	// const { payload: { id } } = req;
-
-	// return Users.findById(id)
-	// 	.then((user) => {
-	// 		if (!user) {
-	// 			return res.sendStatus(400);
-	// 		}
-
-	// 		return res.json({ user: user.toAuthJSON() });
-	// 	});
+	return invalidToken.save()
+		.then(() => {
+			res.statusCode = 200;
+			return res.send()
+		})
 });
-
-
-router.get('/logout', logout());
 
 module.exports = router;

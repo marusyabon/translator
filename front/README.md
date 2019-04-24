@@ -23,7 +23,7 @@ npm run lint
 npm run build
 ```
 
-After that you can copy the "codebase" folder to the production server
+After that you can copy the 'codebase' folder to the production server
 
 
 ### License

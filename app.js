@@ -32,7 +32,8 @@ app.use(errorHandler());
 }
 
 //Models & routes
-require('./models/user');
+require('./models/users');
+require('./models/tokens');
 require('./config/passport');
 app.use(require('./routes'));
 
