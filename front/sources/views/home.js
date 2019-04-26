@@ -1,6 +1,5 @@
 import {JetView, plugins} from 'webix-jet';
-
-
+import Authorization from "../authorization";
 
 export default class TopView extends JetView{
 	config(){
@@ -22,18 +21,9 @@ export default class TopView extends JetView{
 
 		const logout = {
 			view:'button', 
-			id:'logout_button', 
+			localId:'logoutBtn', 
 			value:'Logout', 
-			type:'form', 
-			click: () => {
-				const app = this.app;
-				webix.ajax().get('http://localhost:3000/logout').then((response) => {
-					console.log(response)
-					if(response) {
-						app.show('/index');
-					}
-				})
-			}
+			type:'form'
 		}
 
 		const ui = {
@@ -52,5 +42,17 @@ export default class TopView extends JetView{
 
 	init() {
 		this.use(plugins.Menu, 'top:menu');
+
+		const authorization = new Authorization();
+
+		this.$$("logoutBtn").attachEvent('onItemClick', () => {
+			const app = this.app;
+			
+			authorization.logout().then((response) => {
+				if(response) {
+					app.show('/index');
+				}
+			})
+		})
 	}
 }

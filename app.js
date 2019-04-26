@@ -4,63 +4,58 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const errorHandler = require('errorhandler');
+const logger = require('morgan');
+require('./models/users');
+require('./models/tokens');
+require('./config/passport');
+const indexRouter = require('./routes/index');
+const loginRouter = require('./routes/login');
+const logoutRouter = require('./routes/logout');
+const registerRouter = require('./routes/register');
+const checkRouter = require('./routes/check');
 
 //Configure mongoose's promise to global promise
 mongoose.promise = global.Promise;
 
-//Configure isProduction variable
-const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
-
-app.use(cors());
-app.use(require('morgan')('dev'));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({ secret: 'some-random-pass', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+app.use(cors());
+app.use(require('morgan')('dev'));
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({ secret: 'some-random-pass', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
+
 mongoose.connect('mongodb://localhost:27017/translatorDB', { useNewUrlParser: true });
 mongoose.set('debug', true);
 
-if(!isProduction) {
-app.use(errorHandler());
-}
-
-//Models & routes
-require('./models/users');
-require('./models/tokens');
-require('./config/passport');
-app.use(require('./routes'));
+// routes
+app.use('/', indexRouter);
+app.use('/login', loginRouter);
+app.use('/logout', logoutRouter);
+app.use('/register', registerRouter);
+app.use('/check', checkRouter);
 
 //Error handlers & middlewares
-if(!isProduction) {
-	app.use((err, req, res) => {
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+	next(createError(404));
+});
 
-		res.status(err.status || 500);
+// error handler
+app.use(function (err, req, res, next) {
+	// set locals, only providing error in development
+	res.locals.message = err.message;
+	res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-		res.json({
-			errors: {
-				message: err.message,
-				error: err,
-			},
-		});
-	});
-}
-
-app.use((err, req, res) => {
+	// render the error page
 	res.status(err.status || 500);
-
-	res.json({
-		errors: {
-			message: err.message,
-			error: {},
-		},
-	});
+	res.send(res.locals.error);
 });
 
 module.exports = app;
