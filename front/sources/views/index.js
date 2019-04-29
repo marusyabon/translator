@@ -1,32 +1,32 @@
-import {JetView} from "webix-jet";
-import Authorization from "../authorization";
+import {JetView} from 'webix-jet';
+import Authorization from '../authorization';
 
 export default class IndexPage extends JetView{
 	config(){
 
 		const loginForm = {
-			view: "form",
-			localId: "loginForm",
+			view: 'form',
+			localId: 'loginForm',
 			width: 300,
 			elements: [
-				{ view: "text", label: "Email", name: "email" },
-				{ view: "text", type: "password", label: "Password", name: "password" },
+				{ view: 'text', label: 'Email', name: 'email' },
+				{ view: 'text', type: 'password', label: 'Password', name: 'password' },
 				{
 					margin: 5, cols: [
-						{ view: "button", localId: "loginBtn", value: "Login", type: "form" },
-						{ view: "button", value: "Cancel" }
+						{ view: 'button', localId: 'loginBtn', value: 'Login', type: 'form' },
+						{ view: 'button', value: 'Cancel' }
 					]
 				}
 			]
 		};
 
 		const link = {
-			view: "button",
-			value: "Create an account",
+			view: 'button',
+			value: 'Create an account',
 			click: () => {
 				this.show('/register');
 			}
-		}
+		};
 
 		return { 
 			cols: [
@@ -45,8 +45,8 @@ export default class IndexPage extends JetView{
 	}
 
 	init() {
-		this.$$("loginBtn").attachEvent('onItemClick', () => {
-			const values = this.$$("loginForm").getValues();
+		this.$$('loginBtn').attachEvent('onItemClick', () => {
+			const values = this.$$('loginForm').getValues();
 			const user = {
 				user: values
 			};
@@ -56,12 +56,12 @@ export default class IndexPage extends JetView{
 				if (response) {
 					const res = response.json();
 					webix.storage.session.put('token', res.user.token);
-					this.show("/home/start");
+					this.show('/home/start');
 				}
 				else {
-					webix.message(response)
+					webix.message(response);
 				}
 			});				
-		})
+		});
 	}
 }

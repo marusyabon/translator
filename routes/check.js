@@ -5,39 +5,43 @@ const Users = mongoose.model('Users');
 const Tokens = mongoose.model('Tokens');
 
 router.get('/', auth.required, (req, res, next) => {
-
 	if (req.payload) {
 		const { payload: { id } } = req;
-		const { headers: { authorization } } = req;
+		const { headers: { cookie } } = req;
 
-		Tokens.findOne(
-			{ invalidToken: authorization }, 
-			(err, token) => {
-				if (token) {
-					return res.sendStatus(401);
-				}				
-		})	
+		const cookieArr = cookie.split(' ');
+		cookieArr.forEach((el) => {
+			if (el.indexOf('jwt') == 0) {
+				console.log(el)
+				Tokens.findOne(
+					{ invalidToken: el.split("=")[1] }, 
+					(err, token) => {
+						if (token) {
+							return res.sendStatus(401);
+						}				
+					});
+			}
+		});			
 		
 		return Users.findById(id)
 			.then((user) => {
-					if (!user) {
-						return res.sendStatus(400);
-					}
+				if (!user) {
+					return res.sendStatus(400);
+				}
 
-					else {
-						const resUser = {
-							user: user.toAuthJSON(),
-							allowAccess: true
-						};
+				else {
+					const resUser = {
+						user: user.toAuthJSON(),
+						allowAccess: true
+					};
 
-						return res.send(resUser);
-					}
-				})
+					return res.send(resUser);
+				}
+			});
 	}
 
-	return null
+	return null;
 
 });
-
 
 module.exports = router;

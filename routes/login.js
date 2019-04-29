@@ -4,7 +4,6 @@ const auth = require('../auth');
 
 router.post('/', auth.optional, (req, res, next) => {
 	const user = JSON.parse(req.body.user);
-
 	if (!user.email) {
 		return res.status(422).json({
 			errors: {
@@ -26,7 +25,6 @@ router.post('/', auth.optional, (req, res, next) => {
 	}, 
 		
 	(err, passportUser, info) => {
-		
 		if (err) {
 			return next(err);
 		}
@@ -34,7 +32,7 @@ router.post('/', auth.optional, (req, res, next) => {
 		if (passportUser) {
 			const user = passportUser;
 			user.token = passportUser.generateJWT();
-			res.header('authorization', user.token);
+			res.cookie('jwt', user.token);
 			return res.json({ user: user.toAuthJSON() });
 		}
 
