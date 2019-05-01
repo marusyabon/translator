@@ -33,7 +33,8 @@ router.post('/', auth.optional, (req, res, next) => {
 			const user = passportUser;
 			user.token = passportUser.generateJWT();
 			res.cookie('jwt', user.token);
-			return res.json({ user: user.toAuthJSON() });
+			const userJson = user.toAuthJSON();
+			return res.json({ user: userJson });
 		}
 
 		return res.status(400).json(info);

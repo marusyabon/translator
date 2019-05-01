@@ -12,7 +12,6 @@ router.get('/', auth.required, (req, res, next) => {
 		const cookieArr = cookie.split(' ');
 		cookieArr.forEach((el) => {
 			if (el.indexOf('jwt') == 0) {
-				console.log(el)
 				Tokens.findOne(
 					{ invalidToken: el.split("=")[1] }, 
 					(err, token) => {
