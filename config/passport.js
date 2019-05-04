@@ -2,45 +2,52 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const passportJWT = require('passport-jwt');
 const JWTStrategy = passportJWT.Strategy;
-const ExtractJWT = passportJWT.ExtractJwt;
 const bcrypt = require('bcrypt');
 
 const UserModel = require('../models/users');
 
-passport.use(new LocalStrategy({
+const cookieExtractor = (req) => {
+	let token = null;
+	const cookie = req.headers.cookie;
+	if (req && cookie) {
+		const cookieArr = cookie.split(' ');
+		cookieArr.forEach((el) => {
+			if (el.indexOf('jwt') == 0) {
+				token = el.split("=")[1];
+			}
+		});
+	}
+	return token;
+};
+const opts = {};
+opts.jwtFromRequest = cookieExtractor;
+opts.secretOrKey = "your_jwt_secret";
+
+passport.use('local', new LocalStrategy({
 	usernameField: 'username',
 	passwordField: 'password',
 }, async (username, password, done) => {
 	try {
-		console.log(`passport name: ${username}`)
-		const userDocument = await UserModel.findOne({ username: username }).exec((err, user) => {
-			console.log(`mongoose res: ${err, user}`)
-		});
+		const userDocument = await UserModel.findOne({ username: username });
 
-		const passwordsMatch = await bcrypt.compare(password, userDocument.passwordHash, (err, isMatch) => {
-			debugger
-			console.log(`passwordsMatch ${errr, isMatch}`)
-		});
-		
-		if (passwordsMatch) {
-			return done(null, userDocument);
-		} else {
-			return done('Incorrect Username / Password');
-		}
+		bcrypt.compare(password, userDocument.passwordHash, (err, isMatch) => {
+			if (isMatch) {
+				return done(null, userDocument);
+			} else {
+				return done('Incorrect Username / Password');
+			}
+		});		
 	} catch (error) {
 		done(error);
 	}
 }));
 
-passport.use(new JWTStrategy({
-	jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-    secretOrKey   : 'your_jwt_secret'
-},
-	(jwtPayload, done) => {
-		if (Date.now() > jwtPayload.expires) {
-			return done('jwt expired');
-		}
+passport.use('jwt', new JWTStrategy(opts, (jwtPayload, done) => {
 
-		return done(null, jwtPayload);
+	if (Date.now() > jwtPayload.expires) {
+		return done('jwt expired');
 	}
+
+	return done(null, jwtPayload);
+}
 ));

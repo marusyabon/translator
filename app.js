@@ -32,7 +32,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app.use(session({ secret: 'some-random-pass', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
 
 mongoose.connect('mongodb://localhost:27017/translatorDB', { useNewUrlParser: true });
-mongoose.set('debug', true);
+// mongoose.set('debug', true);
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 
 // routes
 app.use('/', indexRouter);

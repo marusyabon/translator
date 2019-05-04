@@ -9,8 +9,6 @@ router.post('/', (req, res) => {
 		'local',
 		{ session: false },
 		(error, user) => {
-			console.log(`login user: ${user}`)
-
 			if (error || !user) {
 				res.status(400).json({ error });
 			}
@@ -18,7 +16,7 @@ router.post('/', (req, res) => {
 			/** This is what ends up in our JWT */
 			const payload = {
 				username: user.username,
-				expires: Date.now() + parseInt(process.env.JWT_EXPIRATION_MS),
+				expires: Date.now() + 1080000,
 			};
 
 			/** assigns payload to req.user */
@@ -28,11 +26,11 @@ router.post('/', (req, res) => {
 				}
 
 				/** generate a signed json web token and return it in the response */
-				const token = jwt.sign(JSON.stringify(payload), keys.secret);
+				const token  = jwt.sign(JSON.stringify(payload), "your_jwt_secret");
 
 				/** assign our jwt to the cookie */
-				res.cookie('jwt', jwt, { httpOnly: true, secure: true });
-				res.status(200).send({ username });
+				res.cookie('jwt', token, { maxAge: 900000 });
+				res.json({ success: true, token: 'JWT ' + token });
 			});
 		},
 	)(req, res);
