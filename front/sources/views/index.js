@@ -9,7 +9,7 @@ export default class IndexPage extends JetView{
 			localId: 'loginForm',
 			width: 300,
 			elements: [
-				{ view: 'text', label: 'Email', name: 'email' },
+				{ view: 'text', label: 'Username', name: 'username' },
 				{ view: 'text', type: 'password', label: 'Password', name: 'password' },
 				{
 					margin: 5, cols: [
@@ -47,12 +47,9 @@ export default class IndexPage extends JetView{
 	init() {
 		this.$$('loginBtn').attachEvent('onItemClick', () => {
 			const values = this.$$('loginForm').getValues();
-			const user = {
-				user: values
-			};
 			const authorization = new Authorization();
 
-			authorization.login(user).then((response) => {	
+			authorization.login(values).then((response) => {	
 				if (response) {
 					this.show('/home/start');
 				}

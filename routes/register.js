@@ -1,35 +1,27 @@
-const mongoose = require('mongoose');
-const router = require('express').Router();
-const auth = require('../auth');
-const Users = mongoose.model('Users');
+const express = require('express');
+const bcrypt = require('bcrypt');
+const UserModel = require('../models/users');
 
-router.post('/', auth.optional, (req, res, next) => {
-	const user = JSON.parse(req.body.user);
-		
-	if (!user.email) {
-		return res.status(422).json({
-			errors: {
-				email: 'is required',
-			},
+const router = express.Router();
+
+router.post('/', async (req, res) => {
+	const { username, password } = req.body;
+
+	// authentication will take approximately 13 seconds
+	const hashCost = 10;
+
+	try {
+		const passwordHash = await bcrypt.hash(password, hashCost);
+		const userDocument = new UserModel({ username, passwordHash });
+		await userDocument.save();
+
+		res.status(200).send({ username });
+
+	} catch (error) {
+		res.status(400).send({
+			error: 'req body should take the form { username, password }',
 		});
 	}
-
-	if (!user.password) {
-		return res.status(422).json({
-			errors: {
-				password: 'is required',
-			},
-		});
-	}
-
-	const finalUser = new Users(user);
-	const token = finalUser.toAuthJSON();
-
-	finalUser.setPassword(user.password);
-	finalUser.token =  token;
-
-	return finalUser.save()
-		.then(() => res.json({ user: token }));
 });
 
 module.exports = router;

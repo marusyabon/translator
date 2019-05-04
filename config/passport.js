@@ -1,22 +1,46 @@
-const mongoose = require('mongoose');
 const passport = require('passport');
-const LocalStrategy = require('passport-local');
+const LocalStrategy = require('passport-local').Strategy;
+const passportJWT = require('passport-jwt');
+const JWTStrategy = passportJWT.Strategy;
+const ExtractJWT = passportJWT.ExtractJwt;
+const bcrypt = require('bcrypt');
 
-const Users = mongoose.model('Users');
+const UserModel = require('../models/users');
 
 passport.use(new LocalStrategy({
-	usernameField: 'user[email]',
-	passwordField: 'user[password]',
-}, 
-(email, password, done) => {
-	const u_email = JSON.parse(email);
-	const u_pass = JSON.parse(password);
-	Users.findOne({ email: u_email.email })
-		.then((user) => {
-			if (!user || !user.validatePassword(u_pass.password)) {
-				return done(null, false, { errors: { 'email or password': 'is invalid' } });
-			}
-			
-			return done(null, user);
-		}).catch(done);
+	usernameField: 'username',
+	passwordField: 'password',
+}, async (username, password, done) => {
+	try {
+		console.log(`passport name: ${username}`)
+		const userDocument = await UserModel.findOne({ username: username }).exec((err, user) => {
+			console.log(`mongoose res: ${err, user}`)
+		});
+
+		const passwordsMatch = await bcrypt.compare(password, userDocument.passwordHash, (err, isMatch) => {
+			debugger
+			console.log(`passwordsMatch ${errr, isMatch}`)
+		});
+		
+		if (passwordsMatch) {
+			return done(null, userDocument);
+		} else {
+			return done('Incorrect Username / Password');
+		}
+	} catch (error) {
+		done(error);
+	}
 }));
+
+passport.use(new JWTStrategy({
+	jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+    secretOrKey   : 'your_jwt_secret'
+},
+	(jwtPayload, done) => {
+		if (Date.now() > jwtPayload.expires) {
+			return done('jwt expired');
+		}
+
+		return done(null, jwtPayload);
+	}
+));

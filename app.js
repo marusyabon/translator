@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
-const bodyParser = require('body-parser');
-const session = require('express-session');
+// const bodyParser = require('body-parser');
+// const session = require('express-session');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const logger = require('morgan');
@@ -29,7 +29,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({ secret: 'some-random-pass', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
+// app.use(session({ secret: 'some-random-pass', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
 
 mongoose.connect('mongodb://localhost:27017/translatorDB', { useNewUrlParser: true });
 mongoose.set('debug', true);
