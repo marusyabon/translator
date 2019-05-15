@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const userSchema = new Schema({
+const UsersSchema = new Schema({
 	username: {
 		type: String,
 		index: true,
@@ -9,11 +9,19 @@ const userSchema = new Schema({
 		dropDups: true,
 		required: true,
 	},
-	passwordHash: { //salted and hashed using bcrypt
+	passwordHash: { 
 		type: String,
 		required: true,
 	},
+}, {
+	toJSON: {
+		virtuals: true,
+		transform: function (doc, ret) {
+			delete ret._id;
+			delete ret.__v;
+		}
+	}
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', UsersSchema);
 module.exports = User;

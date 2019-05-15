@@ -51,7 +51,7 @@ export default class IndexPage extends JetView{
 
 			authorization.login(values).then((response) => {	
 				if (response) {
-					this.show('/home/start');
+					this.show('/home/main');
 				}
 				else {
 					webix.message(response);
