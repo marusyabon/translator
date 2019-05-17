@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 const GroupsSchema = new Schema({
 	groupName: String,
 	creationDate: Date,
+	wordsCount: Number,
 	userId: {type: Schema.Types.ObjectId, ref: "User"},
 	isRemoved: Boolean
 }, {

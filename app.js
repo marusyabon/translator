@@ -14,6 +14,9 @@ const logoutRouter = require('./routes/logout');
 const registerRouter = require('./routes/register');
 const checkRouter = require('./routes/check');
 const groupsRouter = require('./routes/groups');
+const languagesRouter = require('./routes/languages');
+const wordsRouter = require('./routes/words');
+// const partsOfSpeechRouter = require('./routes/partOfSpeech');
 
 //Configure mongoose's promise to global promise
 mongoose.promise = global.Promise;
@@ -45,6 +48,9 @@ app.use('/logout', logoutRouter);
 app.use('/register', registerRouter);
 app.use('/check', checkRouter);
 app.use('/groups', groupsRouter);
+app.use('/language', languagesRouter);
+app.use('/words', wordsRouter);
+// app.use('/partsOfSpeech', partsOfSpeechRouter);
 
 //Error handlers & middlewares
 // catch 404 and forward to error handler
