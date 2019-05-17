@@ -1,32 +1,34 @@
-import {JetView} from "webix-jet";
-import { groups } from "models/groups";
-import addGroupForm from "./addGroup";
+import { JetView } from 'webix-jet';
+import { groups } from 'models/groups';
+import addGroupForm from './addGroup';
 
 export default class MainView extends JetView{
 	config() {
 
-		const groupsList = {
-			view: "datatable",
-			localId: "groupList",
-		}
+		const testResults = {
+			view: 'datatable',
+			localId: 'groupList',
+			autoConfig: true
+		};
 
 		const button = {
-			view: "button",
-			id: "addGroup",
-			value: "Add group",
+			view: 'button',
+			id: 'addGroup',
+			value: 'Add group',
 			type:'form',
 			inputWidth: 100,
-			click: () => { this.addGroupForm.showWindow(); }
-		}
+			click: () => { this.actForm.showWindow(); }
+		};
 
 		return { 
-			rows: [groupsList, button]
+			rows: [testResults, button]
 		};
 	}
 
-	addGroup
 	init() {
-		this.$$("groupList").sync(groups);
-		this.addGroupForm = this.ui(addGroupForm);
+		this.actForm = this.ui(addGroupForm);
+
+		this.$$('groupList').parse(groups);
+
 	}
 }

@@ -13,6 +13,7 @@ const loginRouter = require('./routes/login');
 const logoutRouter = require('./routes/logout');
 const registerRouter = require('./routes/register');
 const checkRouter = require('./routes/check');
+const groupsRouter = require('./routes/groups');
 
 //Configure mongoose's promise to global promise
 mongoose.promise = global.Promise;
@@ -43,6 +44,7 @@ app.use('/login', loginRouter);
 app.use('/logout', logoutRouter);
 app.use('/register', registerRouter);
 app.use('/check', checkRouter);
+app.use('/groups', groupsRouter);
 
 //Error handlers & middlewares
 // catch 404 and forward to error handler
