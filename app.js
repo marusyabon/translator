@@ -48,7 +48,7 @@ app.use('/logout', logoutRouter);
 app.use('/register', registerRouter);
 app.use('/check', checkRouter);
 app.use('/groups', groupsRouter);
-app.use('/language', languagesRouter);
+app.use('/languages', languagesRouter);
 app.use('/words', wordsRouter);
 // app.use('/partsOfSpeech', partsOfSpeechRouter);
 

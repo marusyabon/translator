@@ -8,25 +8,19 @@ export default class addGroupForm extends JetView {
 			view: 'window',
 			localId: 'formPopup',
 			position:'center',
-			head: 'New group',
+			head: 'Group name',
 			body: {
 				view: 'form',
 				localId: 'formView',
 				elements: [
-					{ view: 'text', name: 'groupName', label: 'Group name', labelPosition: 'top', labelAlign: 'center' },
-					{
-						view: 'button', type: 'form', localId: 'newWord', value: 'Add word',
-						click: () => {
-							// this.addWord();
-						}
-					},
+					{ view: 'text', name: 'groupName', label: ''},
 					{
 						margin: 20,
 						cols: [
 							{
-								view: 'button', type: 'form', localId: 'finishBtn', value: 'Finish',
+								view: 'button', type: 'form', value: 'Save',
 								click: () => {
-									this.saveForm();
+									this.saveGroup();
 								}
 							},
 							{
@@ -37,7 +31,10 @@ export default class addGroupForm extends JetView {
 							}
 						]
 					}
-				]
+				],
+				rules: {
+					"groupName": webix.rules.isNotEmpty
+				}
 			}
 		};
 	}
@@ -46,11 +43,13 @@ export default class addGroupForm extends JetView {
 		this.getRoot().show();
 	}
 
-	saveForm() {
+	saveGroup() {
 		const form = this.$$('formView');
 		const values = form.getValues();
 
 		groups.add(values);
+		form.clearValidation();
+		form.clear();
 		this.$$('formPopup').hide();
 	}
 }

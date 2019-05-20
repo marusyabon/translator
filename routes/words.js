@@ -15,13 +15,16 @@ router.get('/', function (req, res, next) {
 
 router.post('/', function (req, res, next) {
 	let word = new Word(req.body);
-	word.save((err) => {
+	word.save((err, item) => {
+		const response = {};
 		if (err) {
-			res.send({status: 'error'});
+			response.status = 'error';
 		}
 		else {
-			res.send("Word saved");
+			response.status = 'server';
+			response.data = item;
 		}
+		res.send(response)
 	});
 });
 
