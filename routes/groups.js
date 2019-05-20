@@ -4,23 +4,20 @@ const Group = require('../models/groups');
 const Word = require('../models/words');
 
 router.get('/', function (req, res, next) {
-	Group.find({}, function (err, data) {
-		if (!err) {
-			data = data.map((group) => {
-				group.wordsCount = 0;
-				Word.find({ 'groupId': group._id })
-				.populate({path: 'groupId'})
-				.exec(function (err, data){
-					group.wordsCount = data.length;
-					console.log(group)
-				});		
-				return group;
-			});
-			res.send(arr);
+	Group.aggregate([{
+		$lookup: {
+			from: 'words',
+			localField: '_id',
+			foreignField: 'groupId',
+			as: 'words'
 		}
-		else {
-			res.send({ status: 'error' });
-		}
+	}]).exec((err, data) => {
+		console.log(data)
+		data.map((el) => {
+			el.words = el.words.length;
+			return el;
+		});
+		res.send(data);
 	});
 });
 
