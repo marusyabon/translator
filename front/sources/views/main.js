@@ -8,8 +8,13 @@ export default class MainView extends JetView{
 
 		const testResults = {
 			view: 'datatable',
-			localId: 'groupList',
+			id: 'groupList',
+			select: true,
 			columns: [
+				{
+					id: '_id',
+					hidden: true,					
+				},
 				{
 					id: 'groupName',
 					sort: 'text',
@@ -17,31 +22,45 @@ export default class MainView extends JetView{
 					header: 'Name'
 				},
 				{
-					id: 'wordsCount',
+					id: 'words',
 					sort: 'int',
 					fillspace: 1,
 					minWidth: 50,
-					css: 'text_right',
+					css: 'center',
 					header: 'Count'
 				},
 				{
+					id: 'viewCol',
+					header: 'View',
+					css: 'center',
+					width: 50,
+					template: '<i class="fas fa-eye"></i>'
+				},
+				{
 					id: 'editCol',
-					header: '',
+					header: 'Add',
+					css: 'center',
 					width: 50,
 					template: '<i class="fas fa-plus"></i>'
 				},
 				{
 					id: 'removeCol',
-					header: '',
-					width: 50,
+					header: 'Remove',
+					css: 'center',
+					width: 70,
 					template: '{common.trashIcon()}'
 				}				
 			],
 			onClick: {
-				'fa-plus': (e, id) => {
-					this.addWord.showWindow(id);
+				'fa-eye': (e, id) => {
+					const group = $$('groupList').getItem(id);
+					this.show(`/home/group?id=${group._id}`);
 				},
-				'wxi-trash': function (e, id) {
+				'fa-plus': (e, id) => {
+					const group = $$('groupList').getItem(id);
+					this.addWord.showWindow(group._id);
+				},
+				'wxi-trash': (e, id) => {
 					webix.confirm({
 						text: 'Remove group?',
 						callback: function (result) {
@@ -73,7 +92,7 @@ export default class MainView extends JetView{
 		this.addGroup = this.ui(addGroupForm);
 		this.addWord = this.ui(addWordForm);
 
-		this.$$('groupList').parse(groups);
+		$$('groupList').parse(groups);
 
 	}
 }

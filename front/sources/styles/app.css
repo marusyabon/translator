@@ -66,3 +66,7 @@
     vertical-align: text-top;
     padding-right: 3px;
 }
+
+.center {
+    text-align: center;
+}

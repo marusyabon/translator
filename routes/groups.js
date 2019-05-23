@@ -12,7 +12,6 @@ router.get('/', function (req, res, next) {
 			as: 'words'
 		}
 	}]).exec((err, data) => {
-		console.log(data)
 		data.map((el) => {
 			el.words = el.words.length;
 			return el;
@@ -27,6 +26,7 @@ router.post('/', function (req, res, next) {
 		const response = {};
 		if (err) {
 			response.status = 'error';
+			response.data = err;
 		}
 		else {
 			response.status = 'server';

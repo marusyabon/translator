@@ -6,15 +6,23 @@ const GroupsSchema = new Schema({
 	creationDate: Date,
 	userId: {type: Schema.Types.ObjectId, ref: "User"},
 	isRemoved: Boolean
-}, {
-	toJSON: {
-		virtuals: true,
-		transform: function (doc, ret) {
-			delete ret._id;
-			delete ret.__v;
-		}
-	}
 });
+
+GroupsSchema.set('toJSON', {
+	virtuals: true,
+	transform: function (doc, ret) {
+		delete ret._id
+		delete ret.__v
+	}
+})
+
+GroupsSchema.set('toObject', {
+	transform: function (doc, ret) {
+		delete ret._id
+		delete ret.__v
+	}
+})
+
 
 const Group = mongoose.model('Group', GroupsSchema);
 module.exports = Group;

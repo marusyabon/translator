@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const WordsSchema = new Schema({
 	word: String,
-	partOfSpeechId: {type: Schema.Types.ObjectId, ref: "SpeechPart"}, 
+	partOfSpeech: String,
 	groupId: {type: Schema.Types.ObjectId, ref: "Group"}, 
 	languageId: {type: Schema.Types.ObjectId, ref: "Language"}
 });

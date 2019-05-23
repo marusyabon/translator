@@ -25,9 +25,9 @@ export default class addWordForm extends JetView {
 					{
 						margin: 20,
 						cols: [
-							{ view: 'combo', label: 'Language', labelAlign: 'right', width: 160, name: 'originalLanguage', options: { body: { template: '#value#', data: languages } } },
-							{ view: 'text', label: 'Word', labelWidth: 85, labelAlign: 'right', name: 'originalWord', localId: 'originalWord' },
-							{ width: 140 }
+							{ view: 'combo', label: 'Language', labelWidth: 72, labelAlign: 'right', width: 180, name: 'originalLanguage', options: { body: { template: '#value#', data: languages } } },
+							{ view: 'text', label: 'Word', labelWidth: 82, labelAlign: 'right', name: 'originalWord', localId: 'originalWord' },
+							{ view: 'combo', label: 'POS', labelWidth: 40, labelAlign: 'right', width: 140, name: 'partOfSpeech', options: ['Noun', 'Pronoun', 'Verb', 'Adverb'] }
 						]
 					},	
 					{ height: 10 },
@@ -39,8 +39,8 @@ export default class addWordForm extends JetView {
 					{
 						margin: 20,
 						cols: [
-							{ view: 'combo', label: 'Language', labelAlign: 'right', width: 160, name: 'language', options: { body: { template: '#value#', data: languages } } },
-							{ view: 'text', label: 'Translation', labelWidth: 85, labelAlign: 'right', name: 'translation' },
+							{ view: 'combo', label: 'Language', labelWidth: 72, labelAlign: 'right', width: 180, name: 'language', options: { body: { template: '#value#', data: languages } } },
+							{ view: 'text', label: 'Translation', labelWidth: 82, labelAlign: 'right', name: 'translation' },
 							{
 								view: 'button',
 								id: 'addTranslation',
@@ -85,12 +85,11 @@ export default class addWordForm extends JetView {
 		const values = form.getValues();
 		
 		const originalWord = {
-			id: webix.uid(),
 			word: values.originalWord,
+			partOfSpeech: values.partOfSpeech,
 			groupId: values.groupId,
 			languageId: values.originalLanguage
 		}
-		console.log(originalWord);
 
 		words.add(originalWord);
 
