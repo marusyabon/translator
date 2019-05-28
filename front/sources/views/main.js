@@ -37,7 +37,6 @@ export default class MainView extends JetView{
 					template: '<i class="fas fa-eye"></i>'
 				},
 				{
-					id: 'editCol',
 					header: 'Add',
 					css: 'center',
 					width: 50,
@@ -53,12 +52,10 @@ export default class MainView extends JetView{
 			],
 			onClick: {
 				'fa-eye': (e, id) => {
-					const group = $$('groupList').getItem(id);
-					this.show(`/home/group?id=${group._id}`);
+					this.show(`/home/group?id=${id}`);
 				},
 				'fa-plus': (e, id) => {
-					const group = $$('groupList').getItem(id);
-					this.addWord.showWindow(group._id);
+					this.addWord.showWindow(id);
 				},
 				'wxi-trash': (e, id) => {
 					webix.confirm({
@@ -93,6 +90,5 @@ export default class MainView extends JetView{
 		this.addWord = this.ui(addWordForm);
 
 		$$('groupList').parse(groups);
-
 	}
 }

@@ -14,6 +14,8 @@ router.get('/', function (req, res, next) {
 	}]).exec((err, data) => {
 		data.map((el) => {
 			el.words = el.words.length;
+			el.id = el._id;
+			delete el.__v;
 			return el;
 		});
 		res.send(data);
@@ -21,7 +23,7 @@ router.get('/', function (req, res, next) {
 });
 
 router.post('/', function (req, res, next) {
-	let group = new Group(req.body);
+	const group = new Group(req.body);
 	group.save((err, item) => {
 		const response = {};
 		if (err) {

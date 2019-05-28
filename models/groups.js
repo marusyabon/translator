@@ -11,18 +11,10 @@ const GroupsSchema = new Schema({
 GroupsSchema.set('toJSON', {
 	virtuals: true,
 	transform: function (doc, ret) {
-		delete ret._id
-		delete ret.__v
+		delete ret._id;
+		delete ret.__v;
 	}
-})
-
-GroupsSchema.set('toObject', {
-	transform: function (doc, ret) {
-		delete ret._id
-		delete ret.__v
-	}
-})
-
+});
 
 const Group = mongoose.model('Group', GroupsSchema);
 module.exports = Group;

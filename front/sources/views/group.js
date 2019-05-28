@@ -23,14 +23,7 @@ export default class GroupView extends JetView{
 				{
 					id: 'partOfSpeech',
 					fillspace: 1,
-					header: 'Part of speech'
-				},
-				{
-					id: 'editCol',
-					header: 'Edit',
-					css: 'center',
-					width: 50,
-					template: '<i class="fas fa-pen"></i>'
+					header: 'POS'
 				},
 				{
 					id: 'removeCol',
@@ -39,7 +32,20 @@ export default class GroupView extends JetView{
 					width: 70,
 					template: '{common.trashIcon()}'
 				}
-			]
+			],
+			onClick: {
+				'wxi-trash': (e, id) => {
+					webix.confirm({
+						text: 'Remove word?',
+						callback: function (result) {
+							if (result) {
+								words.remove(id);
+							}
+							return false;
+						}
+					});
+				}
+			}
 		};
 
 		return { 
