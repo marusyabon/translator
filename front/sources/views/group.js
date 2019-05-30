@@ -32,9 +32,10 @@ export default class GroupView extends JetView{
 				'wxi-trash': (e, id) => {
 					webix.confirm({
 						text: 'Remove word?',
-						callback: function (result) {
+						callback: (result) => {
 							if (result) {
 								words.remove(id);
+								this.$$('wordsList').remove(id);
 							}
 							return false;
 						}

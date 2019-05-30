@@ -17,6 +17,7 @@ router.get('/', function (req, res, next) {
 			delete el.__v;
 			return el;
 		});
+
 		res.send(data);
 	});
 });
@@ -40,7 +41,7 @@ router.post('/', function (req, res, next) {
 router.delete('/:id', function (req, res, next) {
 	Group.findOneAndDelete(
 		{ _id: req.body.id },
-		function (err, result) {
+		(err, result) => {
 			res.send(result);
 		}
 	);

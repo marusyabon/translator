@@ -17,7 +17,7 @@ router.get('/', function (req, res, next) {
 			delete el.__v;
 			return el;
 		});
-		console.log(data)
+
 		res.send(data);
 	});;
 });
@@ -56,6 +56,27 @@ router.post('/', function (req, res, next) {
 			});
 		}
 	});
+});
+
+router.delete('/:id', function (req, res, next) {
+	Word.findOneAndDelete(
+		{ _id: req.body.id },
+		(err, result) => {
+			const response = {};
+
+			if (!err) {
+				response.word = result;
+				Translation.deleteMany({ 'wordId': req.body.id },
+					(err, result) => {
+						if (!err) {
+							response.translations = result;
+						}
+						res.send(response)
+					}
+				);
+			}
+		}
+	);
 });
 
 module.exports = router;
