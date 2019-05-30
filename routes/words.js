@@ -4,14 +4,22 @@ const Word = require('../models/words');
 const Translation = require('../models/translations');
 
 router.get('/', function (req, res, next) {
-	Word.find({}, function (err, data) {
-		if (!err) {
-			res.send(data);
+	Word.aggregate([{
+		$lookup: {
+			from: 'translations',
+			localField: '_id',
+			foreignField: 'wordId',
+			as: 'translations'
 		}
-		else {
-			res.send({status: 'error'});
-		}
-	});
+	}]).exec((err, data) => {
+		data.map((el) => {
+			el.id = el._id;
+			delete el.__v;
+			return el;
+		});
+		console.log(data)
+		res.send(data);
+	});;
 });
 
 router.post('/', function (req, res, next) {
@@ -48,7 +56,6 @@ router.post('/', function (req, res, next) {
 			});
 		}
 	});
-
 });
 
 module.exports = router;

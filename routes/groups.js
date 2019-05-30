@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Group = require('../models/groups');
-const Word = require('../models/words');
 
 router.get('/', function (req, res, next) {
 	Group.aggregate([{

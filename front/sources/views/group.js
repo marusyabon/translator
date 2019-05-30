@@ -1,5 +1,5 @@
-import {JetView} from 'webix-jet';
-import { groups } from 'models/groups';
+import { JetView } from 'webix-jet';
+import { languages } from 'models/languages';
 import { words } from 'models/words';
 
 export default class GroupView extends JetView{
@@ -14,11 +14,6 @@ export default class GroupView extends JetView{
 					id: 'word',
 					fillspace: 1,
 					header: 'Word'
-				},
-				{
-					id: 'translation',
-					fillspace: 1,
-					header: 'Translation'
 				},
 				{
 					id: 'partOfSpeech',
@@ -54,14 +49,46 @@ export default class GroupView extends JetView{
 	}
 
 	init () {
-		webix.promise.all([ words, groups ]).then((res) => {
-			const id = this.getParam("id", true);
+		webix.promise.all([ words, languages ]).then((res) => {
+			const id = this.getParam('id', true);
+			const grid = this.$$('wordsList');
 
 			let wordsList = words.find((item) => {
 				return item.groupId == id;
 			});
 
-			this.$$('wordsList').parse(wordsList);
+			const trArr = [];
+
+			wordsList = wordsList.map((word) => {
+				const translations = word.translations;
+				translations.forEach((tr) => {
+					//find language value
+					let lang = languages.getItem(tr.languageId);
+					lang = lang.value;
+
+					//if language is unique for this group, push to arr
+					if(trArr.indexOf(lang) == -1) {
+						trArr.push(lang);
+					}
+					
+					//set new property to word
+					word[lang] = tr.word;
+					return tr;
+				});
+				return word;
+			});
+
+			const columns = webix.toArray(grid.config.columns);
+			trArr.forEach((lang, i) => {
+				columns.insertAt({
+					id: trArr[i],
+					header: trArr[i],
+					fillspace: 1
+				}, i+1);
+			});		
+
+			grid.refreshColumns();
+			grid.parse(wordsList);
 		});
 	}
 }
