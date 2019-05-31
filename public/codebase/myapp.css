@@ -56,7 +56,11 @@
   padding: 12px 12px;
 }
 .app_menu .webix_icon {
-  font-size: 20px;
-  vertical-align: middle;
+  font-size: 15px;
+  vertical-align: text-top;
+  padding-right: 3px;
+}
+.center {
+  text-align: center;
 }
 

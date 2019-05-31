@@ -1,20 +1,26 @@
 const mongoose = require('mongoose');
 const router = require('express').Router();
-const Tokens = mongoose.model('Tokens');
+const Token = mongoose.model('Token');
 
 router.get('/', (req, res) => {
-	const token = req.headers.authorization;
-	const currentDate = new Date();
-	const invalidToken = new Tokens({
-		invalidToken: token,
-		currentDate: currentDate
-	});
+	const cookie = req.headers.cookie;
+	const cookieArr = cookie.split(' ');
+	cookieArr.forEach((el) => {
+		if (el.indexOf('jwt') == 0) {
+			const token = el.split("=")[1];
+			const currentDate = new Date();
+			const invalidToken = new Token({
+				invalidToken: token,
+				currentDate: currentDate
+			});
 
-	return invalidToken.save()
-		.then(() => {
-			res.statusCode = 200;
-			return res.send()
-		})
+			return invalidToken.save()
+				.then(() => {
+					res.clearCookie('jwt');
+					res.status(200).send();
+				});
+		}
+	});	
 });
 
 module.exports = router;

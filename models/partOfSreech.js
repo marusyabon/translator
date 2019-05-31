@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const TokensSchema = new Schema({
-	currentDate: Date,
-	invalidToken: Object
+const PartSchema = new Schema({
+	value: String
 }, {
 	toJSON: {
 		virtuals: true,
@@ -14,5 +13,5 @@ const TokensSchema = new Schema({
 	}
 });
 
-const Token = mongoose.model('Token', TokensSchema);
-module.exports = Token;
+const partOfSpeech = mongoose.model('SpeechPart', PartSchema);
+module.exports = partOfSpeech;

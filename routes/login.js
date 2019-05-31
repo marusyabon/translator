@@ -1,47 +1,39 @@
+const express = require('express');
 const passport = require('passport');
-const router = require('express').Router();
-const auth = require('../auth');
+const jwt = require('jsonwebtoken');
 
-router.post('/', auth.optional, (req, res, next) => {
-	const user = JSON.parse(req.body.user);
-	if (!user.email) {
-		return res.status(422).json({
-			errors: {
-				email: 'is required',
-			},
-		});
-	}
+const router = express.Router();
 
-	if (!user.password) {
-		return res.status(422).json({
-			errors: {
-				password: 'is required',
-			},
-		});
-	}
+router.post('/', (req, res) => {
+	passport.authenticate(
+		'local',
+		{ session: false },
+		(error, user) => {
+			if (error || !user) {
+				res.status(400).json({ error });
+			}
 
-	return passport.authenticate('local', { 
-		session: false 
-	}, 
-		
-	(err, passportUser, info) => {
-		if (err) {
-			return next(err);
-		}
+			/** This is what ends up in our JWT */
+			const payload = {
+				username: user.username,
+				expires: Date.now() + 1080000,
+			};
 
-		if (passportUser) {
-			const user = passportUser;
-			user.token = passportUser.generateJWT();
-			res.cookie('jwt', user.token);
-			const userJson = user.toAuthJSON();
-			return res.json({ user: userJson });
-		}
+			/** assigns payload to req.user */
+			req.login(payload, { session: false }, (error) => {
+				if (error) {
+					res.status(400).send({ error });
+				}
 
-		return res.status(400).json(info);
+				/** generate a signed json web token and return it in the response */
+				const token  = jwt.sign(JSON.stringify(payload), "your_jwt_secret");
 
-	})(req, res, () => {
-		res.status(200).send('Success');
-	});
+				/** assign our jwt to the cookie */
+				res.cookie('jwt', token, { maxAge: 900000 });
+				res.json({ success: true, token: 'JWT ' + token });
+			});
+		},
+	)(req, res);
 });
 
 module.exports = router;

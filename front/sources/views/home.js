@@ -12,10 +12,10 @@ export default class TopView extends JetView{
 			css:'app_menu',
 			width:180, layout:'y', select:true,
 			template:'<span class="webix_icon #icon#"></span> #value# ',
-			value: 'Dashboard',
+			value: 'Home',
 			data:[
-				{ value:'Dashboard', id:'start', icon:'wxi-columns' },
-				{ value:'Data',		 id:'data',  icon:'wxi-pencil' }
+				{ value:'Home', id:'main', icon:'fas fa-home' },
+				{ value:'Profile', id:'profile',  icon:'fas fa-user' }
 			]
 		};
 

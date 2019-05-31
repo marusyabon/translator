@@ -9,7 +9,7 @@ export default class RegisterPage extends JetView{
 			localId: 'registerForm',
 			width: 300,
 			elements: [
-				{ view: 'text', label: 'Email', name: 'email' },
+				{ view: 'text', label: 'Uername', name: 'username' },
 				{ view: 'text', type: 'password', label: 'Password', name: 'password' },
 				{
 					margin: 5, cols: [
@@ -39,16 +39,11 @@ export default class RegisterPage extends JetView{
 	init() {
 		this.$$('registerBtn').attachEvent('onItemClick', () => {
 			const values = this.$$('registerForm').getValues();
-			const user = {
-				user: values
-			};
 			const authorization = new Authorization();
 
-			authorization.register(user).then((response) => {
+			authorization.register(values).then((response) => {
 				if (response) {
-					const res = response.json();
-					webix.storage.session.put('token', res.user.token);
-					this.show('/home/start');
+					this.show('/home/main');
 				}
 			});
 		});

@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
-const bodyParser = require('body-parser');
-const session = require('express-session');
+// const bodyParser = require('body-parser');
+// const session = require('express-session');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const logger = require('morgan');
@@ -13,6 +13,10 @@ const loginRouter = require('./routes/login');
 const logoutRouter = require('./routes/logout');
 const registerRouter = require('./routes/register');
 const checkRouter = require('./routes/check');
+const groupsRouter = require('./routes/groups');
+const languagesRouter = require('./routes/languages');
+const wordsRouter = require('./routes/words');
+// const partsOfSpeechRouter = require('./routes/partOfSpeech');
 
 //Configure mongoose's promise to global promise
 mongoose.promise = global.Promise;
@@ -29,10 +33,13 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({ secret: 'some-random-pass', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
+// app.use(session({ secret: 'some-random-pass', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
 
 mongoose.connect('mongodb://localhost:27017/translatorDB', { useNewUrlParser: true });
-mongoose.set('debug', true);
+// mongoose.set('debug', true);
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 
 // routes
 app.use('/', indexRouter);
@@ -40,6 +47,10 @@ app.use('/login', loginRouter);
 app.use('/logout', logoutRouter);
 app.use('/register', registerRouter);
 app.use('/check', checkRouter);
+app.use('/groups', groupsRouter);
+app.use('/languages', languagesRouter);
+app.use('/words', wordsRouter);
+// app.use('/partsOfSpeech', partsOfSpeechRouter);
 
 //Error handlers & middlewares
 // catch 404 and forward to error handler
