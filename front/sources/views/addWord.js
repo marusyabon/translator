@@ -121,6 +121,7 @@ export default class addWordForm extends JetView {
 
 		let translations = [];
 		let tr = {};
+		
 		for (let i = 1; i < count; i++) {
 			tr = {
 				word: translationValues[`translation${i}`],
@@ -132,7 +133,7 @@ export default class addWordForm extends JetView {
 		const batch = {
 			word: word, 
 			translations: translations
-		}
+		};
 
 		words.add(batch);
 

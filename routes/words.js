@@ -19,43 +19,41 @@ router.get('/', function (req, res, next) {
 		});
 
 		res.send(data);
-	});;
+	});
 });
 
-router.post('/', function (req, res, next) {
+router.post('/', async function (req, res, next) {
 	let word = JSON.parse(req.body.word);
 	word = new Word(word);
 
 	const translations = JSON.parse(req.body.translations);
 
-	word.save((err, item) => {
+	try {
+		const item = await word.save();
+		const response = {};
+		const arr = [];
+
+		translations.forEach((tr) => {
+			tr.wordId = item._id;
+			arr.push(tr);
+		});
+
+		const words = await Translation.insertMany(arr);
+
+		response.status = 'server';
+		response.data = {
+			word: item,
+			translations: words
+		};
+
+		res.send(response);
+	} catch(err) {
 		const response = {};
 		if (err) {
 			response.status = 'error';
-			res.send(response)
+			res.send(response);
 		}
-		else {
-			const arr = [];
-			translations.forEach((tr) => {
-				tr.wordId = item._id;
-				arr.push(tr);
-			});
-
-			Translation.insertMany(arr, (err, words) => {
-				if (err) {
-					response.status = 'error';
-				}
-				else {
-					response.status = 'server';
-					response.data = {
-						word: item,
-						translations: words
-					};
-				}
-				res.send(response)				
-			});
-		}
-	});
+	}
 });
 
 router.delete('/:id', function (req, res, next) {
@@ -71,7 +69,7 @@ router.delete('/:id', function (req, res, next) {
 						if (!err) {
 							response.translations = result;
 						}
-						res.send(response)
+						res.send(response);
 					}
 				);
 			}

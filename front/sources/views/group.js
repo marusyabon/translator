@@ -35,7 +35,6 @@ export default class GroupView extends JetView{
 						callback: (result) => {
 							if (result) {
 								words.remove(id);
-								this.$$('wordsList').remove(id);
 							}
 							return false;
 						}
@@ -63,6 +62,7 @@ export default class GroupView extends JetView{
 			wordsList = wordsList.map((word) => {
 				const translations = word.translations;
 				translations.forEach((tr) => {
+
 					//find language value
 					let lang = languages.getItem(tr.languageId);
 					lang = lang.value;
@@ -86,10 +86,12 @@ export default class GroupView extends JetView{
 					header: trArr[i],
 					fillspace: 1
 				}, i+1);
-			});		
+			});	
+			
+			words.parse(wordsList);
 
 			grid.refreshColumns();
-			grid.parse(wordsList);
+			grid.data.sync(words);
 		});
 	}
 }
