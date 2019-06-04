@@ -3,5 +3,10 @@ export const groups = new webix.DataCollection({
 	save: {
 		url: 'rest->http://localhost:3000/groups/',
 		updateFromResponse: true
+	},
+	scheme: {
+		$init(obj) {
+			obj.creationDate = new Date(obj.creationDate);
+		}
 	}
 });

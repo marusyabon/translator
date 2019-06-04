@@ -30,6 +30,12 @@ export default class MainView extends JetView{
 					header: 'Count'
 				},
 				{
+					id: 'creationDate',
+					width: 80,
+					header: 'Created',
+					format: webix.Date.dateToStr("%d %M")
+				},
+				{
 					id: 'viewCol',
 					header: 'View',
 					css: 'center',

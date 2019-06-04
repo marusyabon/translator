@@ -45,11 +45,16 @@ export default class addGroupForm extends JetView {
 
 	saveGroup() {
 		const form = this.$$('formView');
-		const values = form.getValues();
-
+		let values = form.getValues();
+		values.creationDate = new Date();
+		
 		groups.add(values);
+		this.clearForm(form);
+	}
+
+	clearForm(form) {
 		form.clearValidation();
 		form.clear();
-		this.$$('formPopup').hide();
+		form.getParentView().hide();
 	}
 }
