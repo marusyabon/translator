@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Group = require('../models/groups');
+const Word = require('../models/words');
+const Translation = require('../models/translations');
 
 router.get('/', function (req, res, next) {
 	Group.aggregate([{
@@ -38,13 +40,32 @@ router.post('/', function (req, res, next) {
 	});
 });
 
-router.delete('/:id', function (req, res, next) {
-	Group.findOneAndDelete(
-		{ _id: req.body.id },
-		(err, result) => {
-			res.send(result);
+router.delete('/:id', async (req, res, next) => {
+	try {
+		const response = {};
+
+		const group = await Group.findOneAndDelete({ _id: req.body.id });
+		await Word.find({ 'groupId': req.body.id }, (err, words) => {
+			words.forEach(async (word) => {
+				await Translation.deleteMany({ 'wordId': word.id })
+			})
+		});
+		const words = await Word.deleteMany({ 'groupId': req.body.id });
+
+		response.status = 'server';
+		response.group = group;
+		response.words = words; 
+
+		res.send(response);
+
+	} catch(err) {
+		const response = {};
+		if (err) {
+			response.status = 'error';
+			response.data = err;
+			res.send(response);
 		}
-	);
+	}
 });
 
 module.exports = router;

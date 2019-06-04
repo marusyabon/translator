@@ -34,7 +34,8 @@ export default class GroupView extends JetView{
 						text: 'Remove word?',
 						callback: (result) => {
 							if (result) {
-								words.remove(id);
+								words.remove(id)
+								this.$$("wordsList").remove(id);
 							}
 							return false;
 						}
@@ -79,19 +80,22 @@ export default class GroupView extends JetView{
 				return word;
 			});
 
-			const columns = webix.toArray(grid.config.columns);
-			trArr.forEach((lang, i) => {
-				columns.insertAt({
-					id: trArr[i],
-					header: trArr[i],
-					fillspace: 1
-				}, i+1);
-			});	
-			
-			words.parse(wordsList);
+			this.addColums(trArr, grid);
 
-			grid.refreshColumns();
-			grid.data.sync(words);
+			grid.parse(wordsList);
 		});
+	}
+
+	addColums(arr, grid) {
+		const columns = webix.toArray(grid.config.columns);
+		arr.forEach((lang, i) => {
+			columns.insertAt({
+				id: arr[i],
+				header: arr[i],
+				fillspace: 1
+			}, i+1);
+		});	
+		
+		grid.refreshColumns();
 	}
 }

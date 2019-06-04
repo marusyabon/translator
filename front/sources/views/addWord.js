@@ -120,10 +120,9 @@ export default class addWordForm extends JetView {
 		const translationValues = translationsForm.getValues();
 
 		let translations = [];
-		let tr = {};
 		
 		for (let i = 1; i < count; i++) {
-			tr = {
+			let tr = {
 				word: translationValues[`translation${i}`],
 				languageId: translationValues[`language${i}`]
 			};

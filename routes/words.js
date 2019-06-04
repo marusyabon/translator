@@ -22,7 +22,7 @@ router.get('/', function (req, res, next) {
 	});
 });
 
-router.post('/', async function (req, res, next) {
+router.post('/', async (req, res, next) => {
 	let word = JSON.parse(req.body.word);
 	word = new Word(word);
 
@@ -51,30 +51,33 @@ router.post('/', async function (req, res, next) {
 		const response = {};
 		if (err) {
 			response.status = 'error';
+			response.data = err;
 			res.send(response);
 		}
 	}
 });
 
-router.delete('/:id', function (req, res, next) {
-	Word.findOneAndDelete(
-		{ _id: req.body.id },
-		(err, result) => {
-			const response = {};
+router.delete('/:id', async (req, res, next) => {
+	try {
+		const response = {};
 
-			if (!err) {
-				response.word = result;
-				Translation.deleteMany({ 'wordId': req.body.id },
-					(err, result) => {
-						if (!err) {
-							response.translations = result;
-						}
-						res.send(response);
-					}
-				);
-			}
+		const word = await Word.findOneAndDelete({ _id: req.body.id });
+		const translations = await Translation.deleteMany({ 'wordId': req.body.id });
+
+		c.status = 'server';
+		response.word = word; 
+		response.translations = translations;
+
+		res.send(response);
+
+	} catch(err) {
+		const response = {};
+		if (err) {
+			response.status = 'error';
+			response.data = err;
+			res.send(response);
 		}
-	);
+	}
 });
 
 module.exports = router;
