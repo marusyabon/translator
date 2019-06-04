@@ -44,8 +44,22 @@ export default class GroupView extends JetView{
 			}
 		};
 
+		const button = {
+			view: 'button',
+			value: 'Export words',
+			width: 150,
+			click: () => { 
+				webix.toExcel(this.$$('wordsList'));
+			}
+		};
+
 		return { 
-			rows: [dtable]
+			rows: [
+				dtable, 
+				{
+					cols: [{}, button]
+				}				
+			]
 		};
 	}
 
