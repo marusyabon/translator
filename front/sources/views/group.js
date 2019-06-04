@@ -1,6 +1,7 @@
 import { JetView } from 'webix-jet';
 import { languages } from 'models/languages';
 import { words } from 'models/words';
+import createTestForm from './createTest';
 
 export default class GroupView extends JetView{
 	config() {
@@ -44,7 +45,7 @@ export default class GroupView extends JetView{
 			}
 		};
 
-		const button = {
+		const exportBtn = {
 			view: 'button',
 			value: 'Export words',
 			width: 150,
@@ -53,17 +54,29 @@ export default class GroupView extends JetView{
 			}
 		};
 
+		const testBtn = {
+			view: 'button',
+			type: 'form',
+			value: 'Test',
+			width: 100,
+			click: () => { 
+				this.createTest();
+			}
+		};
+
 		return { 
 			rows: [
 				dtable, 
 				{
-					cols: [{}, button]
+					cols: [testBtn, {}, exportBtn]
 				}				
 			]
 		};
 	}
 
 	init () {
+		this.testPopup = this.ui(createTestForm);
+
 		webix.promise.all([ words, languages ]).then((res) => {
 			const id = this.getParam('id', true);
 			const grid = this.$$('wordsList');
@@ -111,5 +124,10 @@ export default class GroupView extends JetView{
 		});	
 		
 		grid.refreshColumns();
+	}
+
+	createTest() {
+		const id = this.getParam('id', true);
+		this.testPopup.showWindow(id);
 	}
 }

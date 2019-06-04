@@ -64,7 +64,7 @@ router.delete('/:id', async (req, res, next) => {
 		const word = await Word.findOneAndDelete({ _id: req.body.id });
 		const translations = await Translation.deleteMany({ 'wordId': req.body.id });
 
-		c.status = 'server';
+		response.status = 'server';
 		response.word = word; 
 		response.translations = translations;
 
