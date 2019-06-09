@@ -4,11 +4,11 @@ import { words } from 'models/words';
 
 export default class addWordForm extends JetView {
 
-	mainRow(count) {
+	mainRow(count, langs) {
 		return {
 			margin: 20,
 			cols: [
-				{ view: 'combo', label: 'Language', labelWidth: 72, labelAlign: 'right', width: 180, name: `language${count}`, options: { body: { template: '#value#', data: languages } } },
+				{ view: 'combo', label: 'Language', labelWidth: 72, labelAlign: 'right', width: 180, name: `language${count}`, options: { body: { template: '#value#', data: langs } } },
 				{ view: 'text', label: 'Translation', labelWidth: 82, labelAlign: 'right', name: `translation${count}` },
 				{
 					view: 'button',
@@ -22,7 +22,7 @@ export default class addWordForm extends JetView {
 				}
 			]
 		}
-	}  
+	}
 
 	config() {
 		return {
@@ -30,17 +30,17 @@ export default class addWordForm extends JetView {
 			localId: 'addWordForm',
 			head: 'Add word',
 			width: 600,
-			position:'center',
+			position: 'center',
 			body: {
 				rows: [
 					{
 						view: 'form',
 						localId: 'wordForm',
 						elements: [
-							{ view: 'text', name: 'id', localId: 'id', hidden: true},
-							{ view: 'text', name: 'groupId', localId: 'groupId', hidden: true},
+							{ view: 'text', name: 'id', localId: 'id', hidden: true },
+							{ view: 'text', name: 'groupId', localId: 'groupId', hidden: true },
 							{
-								view: 'label', 
+								view: 'label',
 								label: 'Original word',
 								height: 24
 							},
@@ -58,13 +58,13 @@ export default class addWordForm extends JetView {
 						view: 'form',
 						localId: 'translationsForm',
 						elements: [
-							{ view: 'text', name: 'wordId', localId: 'wordId', hidden: true},
+							{ view: 'text', name: 'wordId', localId: 'wordId', hidden: true },
 							{
 								view: 'label',
 								label: 'Translations',
 								height: 24
-							},				
-							this.mainRow(1)
+							},
+							this.mainRow(1, languages)
 						]
 					},
 					{
@@ -87,9 +87,66 @@ export default class addWordForm extends JetView {
 							{}
 						]
 					}
-				]				
-			}						
+				]
+			}
 		};
+	}
+
+	init() {
+		const allCombo = this.findAllCombo();
+		allCombo.forEach((combo, i) => {
+			this.onComboChange(combo, i);
+		});
+	}
+
+	findAllCombo() {
+		return this.$$('addWordForm').queryView({ view: 'combo', label: 'Language' }, 'all');
+	}
+
+	onComboChange(combo, i) {	
+		combo.attachEvent('onChange', (newv, oldv) => {
+
+			//get all combo in form
+			const allCombo = this.findAllCombo();
+			const combosArr = allCombo.slice();
+
+			//remove from array combo where caught event
+			combosArr.splice(i, 1);
+
+			//for each combo remove from options list selected value
+			combosArr.forEach((comboEl) => {
+				const allLangs = {...languages.data.pull};
+				let langs = comboEl.getList();
+				langs = langs.data.pull;
+				
+				console.log(langs[newv])
+
+				if(oldv) {
+					const oldVal = allLangs[oldv];
+					langs[oldv] = oldVal;
+				}
+
+				delete langs[newv];
+			
+				const newLangArr = Object.keys(langs).map((k) => langs[k]);
+
+				comboEl.define('options', { body: { template: '#value#', data: newLangArr } });
+				comboEl.refresh();
+			});			
+		});
+	}
+
+	removeSelectedOptions() {
+		const allCombo = this.findAllCombo();
+		const newLang = {...languages.data.pull};
+
+		allCombo.forEach((item) => {
+			const value = item.getValue();
+			delete newLang[value];
+		});
+
+		const newLangArr = Object.keys(newLang).map((k) => newLang[k]);
+		return newLangArr;
 	}
 
 	showWindow(id) {
@@ -104,33 +161,37 @@ export default class addWordForm extends JetView {
 		const form = this.$$('translationsForm');
 		const rows = form.getChildViews();
 		const rowsCount = rows.length;
-		const target = rows[rowsCount-1];
+		const target = rows[rowsCount - 1];
 
 		webix.ui({ width: 140 }, target, $$('addTranslation'));
 		const count = form.getChildViews().length - 1;
-		form.addView(this.mainRow(count));		
+		const langs = this.removeSelectedOptions();
+		form.addView(this.mainRow(count, langs));
+
+		const allCombo = this.findAllCombo();
+		this.onComboChange(allCombo[count], count);
 	}
 
 	saveForm() {
 		const wordForm = this.$$('wordForm');
 		let word = wordForm.getValues();
 		const translationsForm = this.$$('translationsForm');
-		
+
 		const count = translationsForm.getChildViews().length - 1;
 		const translationValues = translationsForm.getValues();
 
 		let translations = [];
-		
+
 		for (let i = 1; i < count; i++) {
 			let tr = {
 				word: translationValues[`translation${i}`],
 				languageId: translationValues[`language${i}`]
 			};
-			translations.push(tr);	
+			translations.push(tr);
 		}
 
 		const batch = {
-			word: word, 
+			word: word,
 			translations: translations
 		};
 
