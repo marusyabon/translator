@@ -94,7 +94,7 @@ export default class addWordForm extends JetView {
 
 	init() {
 		const allCombo = this.findAllCombo();
-		allCombo.forEach((combo, i) => {
+		allCombo.forEach((combo, allCombo, i) => {
 			this.onComboChange(combo, i);
 		});
 	}
@@ -103,49 +103,45 @@ export default class addWordForm extends JetView {
 		return this.$$('addWordForm').queryView({ view: 'combo', label: 'Language' }, 'all');
 	}
 
-	onComboChange(combo, i) {	
+	onComboChange(combo, allCombo, i) {	
 		combo.attachEvent('onChange', (newv, oldv) => {
 
 			//get all combo in form
-			const allCombo = this.findAllCombo();
 			const combosArr = allCombo.slice();
-
+			const allLangs = {...languages.data.pull};
 			//remove from array combo where caught event
 			combosArr.splice(i, 1);
 
 			//for each combo remove from options list selected value
-			combosArr.forEach((comboEl) => {
-				const allLangs = {...languages.data.pull};
-				let langs = comboEl.getList();
-				langs = langs.data.pull;
-				
-				console.log(langs[newv])
+			
+			combosArr.forEach((comboEl, n) => {
+				const langs = comboEl.getList().serialize();
 
 				if(oldv) {
 					const oldVal = allLangs[oldv];
-					langs[oldv] = oldVal;
+					langs.push(oldVal);
 				}
 
-				delete langs[newv];
-			
-				const newLangArr = Object.keys(langs).map((k) => langs[k]);
+				const index = langs.indexOf(langs.find((item) => {return item.id == newv}));
+				console.log(langs, newv, index)
+				langs.splice(index, 1);
 
-				comboEl.define('options', { body: { template: '#value#', data: newLangArr } });
+				comboEl.define('options', langs);
 				comboEl.refresh();
-			});			
+			});	
 		});
 	}
 
-	removeSelectedOptions() {
+	removeSelectedLangs() {
+		const allLangs = {...languages.data.pull};
 		const allCombo = this.findAllCombo();
-		const newLang = {...languages.data.pull};
 
 		allCombo.forEach((item) => {
 			const value = item.getValue();
-			delete newLang[value];
+			delete allLangs[value];
 		});
-
-		const newLangArr = Object.keys(newLang).map((k) => newLang[k]);
+		
+		const newLangArr = Object.keys(allLangs).map((k) => allLangs[k]);
 		return newLangArr;
 	}
 
@@ -164,12 +160,13 @@ export default class addWordForm extends JetView {
 		const target = rows[rowsCount - 1];
 
 		webix.ui({ width: 140 }, target, $$('addTranslation'));
+
 		const count = form.getChildViews().length - 1;
-		const langs = this.removeSelectedOptions();
+		const langs = this.removeSelectedLangs();
 		form.addView(this.mainRow(count, langs));
 
 		const allCombo = this.findAllCombo();
-		this.onComboChange(allCombo[count], count);
+		this.onComboChange(allCombo[count], allCombo, count);
 	}
 
 	saveForm() {
