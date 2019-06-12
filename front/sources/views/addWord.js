@@ -94,7 +94,7 @@ export default class addWordForm extends JetView {
 
 	init() {
 		const allCombo = this.findAllCombo();
-		allCombo.forEach((combo, allCombo, i) => {
+		allCombo.forEach((combo, i) => {
 			this.onComboChange(combo, i);
 		});
 	}
@@ -103,10 +103,12 @@ export default class addWordForm extends JetView {
 		return this.$$('addWordForm').queryView({ view: 'combo', label: 'Language' }, 'all');
 	}
 
-	onComboChange(combo, allCombo, i) {	
+	onComboChange(combo, i) {	
 		combo.attachEvent('onChange', (newv, oldv) => {
 
 			//get all combo in form
+			//need  to find all combo again, in case if new was adde
+			const allCombo = this.findAllCombo();
 			const combosArr = allCombo.slice();
 			const allLangs = {...languages.data.pull};
 			//remove from array combo where caught event
@@ -114,18 +116,19 @@ export default class addWordForm extends JetView {
 
 			//for each combo remove from options list selected value
 			
-			combosArr.forEach((comboEl, n) => {
+			combosArr.forEach((comboEl) => {
 				const langs = comboEl.getList().serialize();
 
+				//return to options list value, if it was unselected
 				if(oldv) {
 					const oldVal = allLangs[oldv];
 					langs.push(oldVal);
 				}
 
 				const index = langs.indexOf(langs.find((item) => {return item.id == newv}));
-				console.log(langs, newv, index)
 				langs.splice(index, 1);
 
+				//set filtered list of languages
 				comboEl.define('options', langs);
 				comboEl.refresh();
 			});	
@@ -161,12 +164,12 @@ export default class addWordForm extends JetView {
 
 		webix.ui({ width: 140 }, target, $$('addTranslation'));
 
-		const count = form.getChildViews().length - 1;
+		const index = form.getChildViews().length - 1;
 		const langs = this.removeSelectedLangs();
-		form.addView(this.mainRow(count, langs));
+		form.addView(this.mainRow(index, langs));
 
 		const allCombo = this.findAllCombo();
-		this.onComboChange(allCombo[count], allCombo, count);
+		this.onComboChange(allCombo[index], index);
 	}
 
 	saveForm() {
