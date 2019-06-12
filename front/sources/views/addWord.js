@@ -52,7 +52,12 @@ export default class addWordForm extends JetView {
 									{ view: 'combo', label: 'POS', labelWidth: 40, labelAlign: 'right', width: 140, name: 'partOfSpeech', options: ['Noun', 'Pronoun', 'Verb', 'Adverb'] }
 								]
 							}
-						]
+						],
+						rules: {
+							"languageId": webix.rules.isNotEmpty,
+							"word": webix.rules.isNotEmpty,
+							"partOfSpeech": webix.rules.isNotEmpty,
+						}
 					},
 					{
 						view: 'form',
@@ -195,12 +200,14 @@ export default class addWordForm extends JetView {
 			translations: translations
 		};
 
-		words.add(batch);
+		if(wordForm.validate()) {
+			words.add(batch);
+			wordForm.clearValidation();
+			translationsForm.clearValidation();
+			wordForm.clear();
+			translationsForm.clear();
+			this.$$('addWordForm').hide();
+		}
 
-		wordForm.clearValidation();
-		translationsForm.clearValidation();
-		wordForm.clear();
-		translationsForm.clear();
-		this.$$('addWordForm').hide();
 	}
 }
