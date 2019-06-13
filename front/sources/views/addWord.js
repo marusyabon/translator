@@ -17,11 +17,11 @@ export default class addWordForm extends JetView {
 					type: 'form',
 					width: 140,
 					click: () => {
-						this.addTranslation()
+						this.addTranslation();
 					}
 				}
 			]
-		}
+		};
 	}
 
 	config() {
@@ -54,9 +54,9 @@ export default class addWordForm extends JetView {
 							}
 						],
 						rules: {
-							"languageId": webix.rules.isNotEmpty,
-							"word": webix.rules.isNotEmpty,
-							"partOfSpeech": webix.rules.isNotEmpty,
+							'languageId': webix.rules.isNotEmpty,
+							'word': webix.rules.isNotEmpty,
+							'partOfSpeech': webix.rules.isNotEmpty,
 						}
 					},
 					{

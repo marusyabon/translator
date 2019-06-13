@@ -1,7 +1,4 @@
 import { JetView } from 'webix-jet';
-import { groups } from 'models/groups';
-import { words } from 'models/words';
-import { languages } from 'models/languages';
 
 export default class createTestForm extends JetView {
 	config() {
@@ -17,7 +14,16 @@ export default class createTestForm extends JetView {
 		};
 	}
 
-	showWindow(id) {
-		this.getRoot().show();
+	showWindow(id, languages, words) {
+		this.createTest(id, languages, words);
+		this.getRoot().show();		
+	}
+
+	createTest(id, languages, words) {
+		const wordsList = words.find((item) => {
+			return item.groupId == id;
+		});
+
+		const word = wordsList[Math.floor(Math.random()*wordsList.length)];
 	}
 }

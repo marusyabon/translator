@@ -35,8 +35,8 @@ export default class GroupView extends JetView{
 						text: 'Remove word?',
 						callback: (result) => {
 							if (result) {
-								words.remove(id)
-								this.$$("wordsList").remove(id);
+								words.remove(id);
+								this.$$('wordsList').remove(id);
 							}
 							return false;
 						}
@@ -121,13 +121,13 @@ export default class GroupView extends JetView{
 				header: arr[i],
 				fillspace: 1
 			}, i+1);
-		});	
+		});
 		
 		grid.refreshColumns();
 	}
 
 	createTest() {
 		const id = this.getParam('id', true);
-		this.testPopup.showWindow(id);
+		this.testPopup.showWindow(id, languages, words);
 	}
 }
