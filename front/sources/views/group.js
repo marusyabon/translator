@@ -86,26 +86,30 @@ export default class GroupView extends JetView{
 			});
 
 			const trArr = [];
+			const langsList = [];
 
 			wordsList = wordsList.map((word) => {
 				const translations = word.translations;
 				translations.forEach((tr) => {
 
 					//find language value
-					let lang = languages.getItem(tr.languageId);
-					lang = lang.value;
+					const lang = languages.getItem(tr.languageId);
+					const langVal = lang.value;
 
 					//if language is unique for this group, push to arr
-					if(trArr.indexOf(lang) == -1) {
-						trArr.push(lang);
+					if(trArr.indexOf(langVal) == -1) {
+						trArr.push(langVal);
+						langsList.push(lang);
 					}
 					
 					//set new property to word
-					word[lang] = tr.word;
+					word[langVal] = tr.word;
 					return tr;
 				});
 				return word;
 			});
+
+			this.langsList = langsList;
 
 			this.addColums(trArr, grid);
 
@@ -127,7 +131,6 @@ export default class GroupView extends JetView{
 	}
 
 	createTest() {
-		const id = this.getParam('id', true);
-		this.testPopup.showWindow(id, languages, words);
+		this.testPopup.showWindow(this.langsList);
 	}
 }
