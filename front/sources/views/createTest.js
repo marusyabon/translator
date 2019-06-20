@@ -39,27 +39,6 @@ export default class createTestForm extends JetView {
 		this.getRoot().show();		
 	}
 
-	createTest(language) {
-		const groupId = this._data.id;
-		words.waitData.then(() => {
-			let wordsList = words.find((item) => {
-				return item.groupId == groupId;
-			});
-
-			wordsList = this.shuffle(wordsList);
-
-			if(wordsList.length > 10) {
-				wordsList.splice(wordsList[10], wordsList.length - 10);
-			};
-
-			wordsList.forEach(() => {
-
-			});
-
-			webix.ui(this.testForm(), $$('chooseLangForm'));
-		});
-	}
-
 	shuffle(array) {
 		const shuffledArr = [];
 		let num = array.length;
@@ -81,12 +60,70 @@ export default class createTestForm extends JetView {
 		return shuffledArr;
 	}
 
-	testForm() {
-		return {
-			margin: 10,
-			cols: [
+	createTest(language) {
+		const groupId = this._data.id;
 
-			]
+		words.waitData.then(() => {
+			let wordsList = words.find((item) => {
+				return item.groupId == groupId;
+			});
+			
+			const wordsArr = words.serialize();
+			
+			let translationsArr = wordsArr.map((item) => {
+				const translation = item.translations.find((tr) => {
+					debugger
+					tr.languageId == language;
+				});
+				return translation;
+			});
+
+			// console.log(translationsArr)
+
+			wordsList = this.shuffle(wordsList);
+
+			if(wordsList.length > 10) {
+				wordsList.splice(wordsList[10], wordsList.length - 10);
+			}
+
+			this.showQuestion(0, wordsList);	
+		});
+	}
+
+	showQuestion(n, wordsList) {
+		const translations = [];
+		let word;
+		let id = 'chooseLangForm';
+
+		if (n == 0) {
+			word = wordsList[0].word;
+			id = 'translationsButtons';
 		}
+
+		webix.ui(
+			{
+				localId: id,
+				margin: 10,
+				padding: 10,
+				cols: this.setTranslations(translations)
+			},		
+
+			this.$$('formPopup'), 
+			this.$$('chooseLangForm')
+		);
+		this.$$('formPopup').getHead().setHTML(word);
+	}
+
+	setTranslations(translations) {
+		const buttons = [];
+		translations.forEach((word) => {
+			buttons.push({
+				view: 'button',
+				value: word,
+				type: 'form',
+				autowidth: true
+			});
+		});
+		return buttons;
 	}
 }
