@@ -61,69 +61,128 @@ export default class createTestForm extends JetView {
 	}
 
 	createTest(language) {
+		this.score = 0;
 		const groupId = this._data.id;
 
 		words.waitData.then(() => {
+			//find words of this group
 			let wordsList = words.find((item) => {
 				return item.groupId == groupId;
 			});
-			
-			const wordsArr = words.serialize();
-			
-			let translationsArr = wordsArr.map((item) => {
-				const translation = item.translations.find((tr) => {
-					debugger
-					tr.languageId == language;
-				});
-				return translation;
+
+			// find words, which have translations on selected language
+			wordsList = wordsList.filter((item) => {
+				if (item.translations.find((tr) => {
+					return tr.languageId == language;
+				})) {
+					return item;
+				}
 			});
+			
+			const wordsArr = words.serialize(); // create an array of all words
+			let translationsArr = [];
 
-			// console.log(translationsArr)
+			// find all translations on selected language
+			wordsArr.forEach((item) => {
+				const translation = item.translations.find((tr) => {
+					return tr.languageId == language;
+				});
+				if (translation) {
+					// if original of this translation is of the same part of speech as the word
+					// push it to array of translations
+					translationsArr.push(translation);
+					translation.partOfSpeech = item.partOfSpeech;
+				}
+			});
+			
+			wordsList = this.shuffle(wordsList); //mix the words array
 
-			wordsList = this.shuffle(wordsList);
-
-			if(wordsList.length > 10) {
+			// if in array more then 10 words, cut it
+			if (wordsList.length > 10) {
 				wordsList.splice(wordsList[10], wordsList.length - 10);
 			}
 
-			this.showQuestion(0, wordsList);	
+			this.wordsList = wordsList;
+			this.translationsArr = translationsArr;
+
+			this.showQuestion(0, wordsList, translationsArr); 
 		});
 	}
 
-	showQuestion(n, wordsList) {
-		const translations = [];
-		let word;
-		let id = 'chooseLangForm';
+	showQuestion(n, wordsList, translationsArr) {
+		if(n < wordsList.length) {
+			const wordObj = wordsList[n];
+			const rightAnswer = translationsArr.find((tr) => {
+				if(tr.wordId == wordObj.id) {
+					tr.isCorrect = true;
+					return tr;
+				}
+			});
+			let translations = translationsArr.filter((tr) => {
+				return tr.partOfSpeech == wordObj.partOfSpeech && tr.wordId != wordObj.id;
+			});
 
-		if (n == 0) {
-			word = wordsList[0].word;
-			id = 'translationsButtons';
+			// if in array more then 3 words, cut it
+			if (translations.length > 3) {
+				translations.splice(translations[3], translations.length - 3);
+			}
+			
+			translations.push(rightAnswer); // add to translations array correct answer
+			translations = this.shuffle(translations); //mix the translations array
+			
+			const id = ( n > 0) ?  'translationsButtons' : 'chooseLangForm';
+
+			webix.ui(
+				{
+					localId: 'translationsButtons',
+					margin: 10,
+					padding: 10,
+					cols: this.setTranslations(translations, n)
+				},
+
+				this.$$('formPopup'),
+				this.$$(id)
+			);
+			this.$$('formPopup').getHead().setHTML(wordObj.word);
 		}
+		else {
+			webix.ui(
+				{
+					template: this.score
+				},
 
-		webix.ui(
-			{
-				localId: id,
-				margin: 10,
-				padding: 10,
-				cols: this.setTranslations(translations)
-			},		
-
-			this.$$('formPopup'), 
-			this.$$('chooseLangForm')
-		);
-		this.$$('formPopup').getHead().setHTML(word);
+				this.$$('formPopup'),
+				this.$$('translationsButtons')
+			);
+			this.$$('formPopup').getHead().setHTML('Your result');
+		}
 	}
 
-	setTranslations(translations) {
+	setTranslations(translations, n) {
 		const buttons = [];
-		translations.forEach((word) => {
+		translations.forEach((tr) => {
 			buttons.push({
 				view: 'button',
-				value: word,
+				value: tr.word,
 				type: 'form',
-				autowidth: true
+				autowidth: true,
+				click: () => {
+					this.answerAction(tr, n);
+				}
 			});
 		});
 		return buttons;
+	}
+
+	answerAction(translation, n) {
+		if(translation.isCorrect) {
+			if(translation.partOfSpeech == 'Noun' || translation.partOfSpeech == 'Verb')  {
+				this.score = this.score + 2;
+			}
+			else {
+				this.score = this.score + 1;
+			}
+		}
+		this.showQuestion(++n, this.wordsList, this.translationsArr);
 	}
 }
