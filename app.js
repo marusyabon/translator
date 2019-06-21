@@ -16,7 +16,7 @@ const checkRouter = require('./routes/check');
 const groupsRouter = require('./routes/groups');
 const languagesRouter = require('./routes/languages');
 const wordsRouter = require('./routes/words');
-// const partsOfSpeechRouter = require('./routes/partOfSpeech');
+const testresults = require('./routes/testresults');
 
 //Configure mongoose's promise to global promise
 mongoose.promise = global.Promise;
@@ -51,7 +51,7 @@ app.use('/check', checkRouter);
 app.use('/groups', groupsRouter);
 app.use('/languages', languagesRouter);
 app.use('/words', wordsRouter);
-// app.use('/partsOfSpeech', partsOfSpeechRouter);
+app.use('/testresults', testresults);
 
 //Error handlers & middlewares
 // catch 404 and forward to error handler

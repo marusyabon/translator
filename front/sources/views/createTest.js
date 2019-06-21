@@ -1,5 +1,6 @@
 import { JetView } from 'webix-jet';
 import { words } from 'models/words';
+import { testresults } from 'models/testresults';
 
 export default class createTestForm extends JetView {
 	config() {
@@ -36,6 +37,7 @@ export default class createTestForm extends JetView {
 
 	init() {
 		this.formPopup = this.$$('formPopup');
+		this.groupId = this._data.id;
 	}
 
 	showWindow(languages) {
@@ -66,7 +68,7 @@ export default class createTestForm extends JetView {
 
 	createTest(language) {
 		this.score = 0;
-		const groupId = this._data.id;
+		const groupId = this.groupId;
 
 		words.waitData.then(() => {
 			//find words of this group
@@ -137,6 +139,7 @@ export default class createTestForm extends JetView {
 			this.$$('currentWordId').setValue(wordObj.id);
 		}
 		else {
+			this.saveResults();
 			this.showResults();
 			this.formPopup.getHead().setHTML('Your result');
 		}
@@ -223,5 +226,14 @@ export default class createTestForm extends JetView {
 			this.formPopup,
 			this.$$('translationsButtons')
 		);
+	}
+
+	saveResults() {
+		const result = {
+			passedDate: new Date(),
+			groupId: this.groupId,
+			score: this.score
+		};
+		testresults.add(result);
 	}
 }
