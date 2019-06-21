@@ -98,6 +98,11 @@ export default class addWordForm extends JetView {
 	}
 
 	init() {
+		this.translationsForm = this.$$('translationsForm');
+		this.wordForm = this.$$('wordForm');
+		this.addWordForm = this.$$('addWordForm');
+		this.btnAddTranslation = $$('addTranslation');
+
 		const allCombo = this.findAllCombo();
 		allCombo.forEach((combo, i) => {
 			this.onComboChange(combo, i);
@@ -121,22 +126,7 @@ export default class addWordForm extends JetView {
 
 			//for each combo remove from options list selected value
 			
-			combosArr.forEach((comboEl) => {
-				const langs = comboEl.getList().serialize();
-
-				//return to options list value, if it was unselected
-				if(oldv) {
-					const oldVal = allLangs[oldv];
-					langs.push(oldVal);
-				}
-
-				const index = langs.indexOf(langs.find((item) => {return item.id == newv}));
-				langs.splice(index, 1);
-
-				//set filtered list of languages
-				comboEl.define('options', langs);
-				comboEl.refresh();
-			});	
+			combosArr.forEach( el => this.setOptions(el, allLangs, newv, oldv));	
 		});
 	}
 
@@ -162,28 +152,25 @@ export default class addWordForm extends JetView {
 	}
 
 	addTranslation() {
-		const form = this.$$('translationsForm');
-		const rows = form.getChildViews();
+		const rows = this.translationsForm.getChildViews();
 		const rowsCount = rows.length;
 		const target = rows[rowsCount - 1];
 
-		webix.ui({ width: 140 }, target, $$('addTranslation'));
+		webix.ui({ width: 140 }, target, this.btnAddTranslation);
 
-		const index = form.getChildViews().length - 1;
+		const index = this.translationsForm.getChildViews().length - 1;
 		const langs = this.removeSelectedLangs();
-		form.addView(this.mainRow(index, langs));
+		this.translationsForm.addView(this.mainRow(index, langs));
 
 		const allCombo = this.findAllCombo();
 		this.onComboChange(allCombo[index], index);
 	}
 
 	saveForm() {
-		const wordForm = this.$$('wordForm');
-		let word = wordForm.getValues();
-		const translationsForm = this.$$('translationsForm');
+		let word = this.wordForm.getValues();
 
-		const count = translationsForm.getChildViews().length - 1;
-		const translationValues = translationsForm.getValues();
+		const count = this.translationsForm.getChildViews().length - 1;
+		const translationValues = this.translationsForm.getValues();
 
 		let translations = [];
 
@@ -196,18 +183,39 @@ export default class addWordForm extends JetView {
 		}
 
 		const batch = {
-			word: word,
-			translations: translations
+			word,
+			translations
 		};
 
-		if(wordForm.validate()) {
+		if(this.wordForm.validate()) {
 			words.add(batch);
-			wordForm.clearValidation();
-			translationsForm.clearValidation();
-			wordForm.clear();
-			translationsForm.clear();
-			this.$$('addWordForm').hide();
+			this.hideWindow();			
+		}
+	}
+
+	hideWindow() {
+		this.wordForm.clearValidation();
+		this.translationsForm.clearValidation();
+		this.wordForm.clear();
+		this.translationsForm.clear();
+		this.addWordForm.hide();
+	}
+
+	setOptions(el, allLangs, newv, oldv) {
+		// move to function
+		const langs = el.getList().serialize();
+
+		//return to options list value, if it was unselected
+		if(oldv) {
+			const oldVal = allLangs[oldv];
+			langs.push(oldVal);
 		}
 
+		const index = langs.indexOf(langs.find((item) => {return item.id === newv}));
+		langs.splice(index, 1);
+
+		//set filtered list of languages
+		el.define('options', langs);
+		el.refresh();
 	}
 }

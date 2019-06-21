@@ -21,6 +21,7 @@ export default class addGroupForm extends JetView {
 								view: 'button', type: 'form', value: 'Save',
 								click: () => {
 									this.saveGroup();
+									this.hideWindow();
 								}
 							},
 							{
@@ -33,19 +34,27 @@ export default class addGroupForm extends JetView {
 					}
 				],
 				rules: {
-					"groupName": webix.rules.isNotEmpty
+					'groupName': webix.rules.isNotEmpty
 				}
 			}
 		};
 	}
+	
+	init() {
+		this.mainWindow = this.$$('formPopup');
+	}
 
-	showWindow(id) {
-		this.getRoot().show();
+	showWindow() {
+		this.mainWindow.show();
+	}
+
+	hideWindow() {
+		this.mainWindow.hide();
 	}
 
 	saveGroup() {
 		const form = this.$$('formView');
-		let values = form.getValues();
+		const values = form.getValues();
 		values.creationDate = new Date();
 		
 		groups.add(values);
@@ -55,6 +64,5 @@ export default class addGroupForm extends JetView {
 	clearForm(form) {
 		form.clearValidation();
 		form.clear();
-		form.getParentView().hide();
 	}
 }

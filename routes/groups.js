@@ -45,10 +45,9 @@ router.delete('/:id', async (req, res, next) => {
 		const response = {};
 
 		const group = await Group.findOneAndDelete({ _id: req.body.id });
-		await Word.find({ 'groupId': req.body.id }, (err, words) => {
-			words.forEach(async (word) => {
-				await Translation.deleteMany({ 'wordId': word.id })
-			})
+		const wordsTemp = await Word.find({ 'groupId': req.body.id });
+		wordsTemp.forEach(async (word) => {
+			await Translation.deleteMany({ 'wordId': word.id });
 		});
 		const words = await Word.deleteMany({ 'groupId': req.body.id });
 

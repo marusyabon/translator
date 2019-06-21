@@ -34,6 +34,10 @@ export default class createTestForm extends JetView {
 		};
 	}
 
+	init() {
+		this.formPopup = this.$$('formPopup');
+	}
+
 	showWindow(languages) {
 		this.$$('chooseLang').define('options', languages);
 		this.getRoot().show();		
@@ -66,17 +70,18 @@ export default class createTestForm extends JetView {
 
 		words.waitData.then(() => {
 			//find words of this group
-			let wordsList = words.find((item) => {
-				return item.groupId == groupId;
-			});
+			let wordsList = words.find(item => item.groupId === groupId);
 
 			// find words, which have translations on selected language
+			
 			wordsList = wordsList.filter((item) => {
-				if (item.translations.find((tr) => {
-					return tr.languageId == language;
-				})) {
-					return item;
+				const wordItem = item.translations.find((tr) => {
+					return tr.languageId === language;
+				});
+				if (wordItem) {
+					return true;
 				}
+				return false;
 			});
 			
 			const wordsArr = words.serialize(); // create an array of all words
@@ -85,7 +90,7 @@ export default class createTestForm extends JetView {
 			// find all translations on selected language
 			wordsArr.forEach((item) => {
 				const translation = item.translations.find((tr) => {
-					return tr.languageId == language;
+					return tr.languageId === language;
 				});
 				if (translation) {
 					// if original of this translation is of the same part of speech as the word
@@ -112,14 +117,9 @@ export default class createTestForm extends JetView {
 	showQuestion(n, wordsList, translationsArr) {
 		if(n < wordsList.length) {
 			const wordObj = wordsList[n];
-			const rightAnswer = translationsArr.find((tr) => {
-				if(tr.wordId == wordObj.id) {
-					tr.isCorrect = true;
-					return tr;
-				}
-			});
+			const rightAnswer = translationsArr.find(tr => tr.wordId === wordObj.id);
 			let translations = translationsArr.filter((tr) => {
-				return tr.partOfSpeech == wordObj.partOfSpeech && tr.wordId != wordObj.id;
+				return tr.partOfSpeech === wordObj.partOfSpeech && tr.wordId != wordObj.id;
 			});
 
 			// if in array more then 3 words, cut it
@@ -132,29 +132,13 @@ export default class createTestForm extends JetView {
 			
 			const id = ( n > 0) ?  'translationsButtons' : 'chooseLangForm';
 
-			webix.ui(
-				{
-					localId: 'translationsButtons',
-					margin: 10,
-					padding: 10,
-					cols: this.setTranslations(translations, n)
-				},
-
-				this.$$('formPopup'),
-				this.$$(id)
-			);
-			this.$$('formPopup').getHead().setHTML(wordObj.word);
+			this.changeButtons(n, id, translations);
+			this.formPopup.getHead().setHTML(wordObj.word);
+			this.$$('currentWordId').setValue(wordObj.id);
 		}
 		else {
-			webix.ui(
-				{
-					template: this.score
-				},
-
-				this.$$('formPopup'),
-				this.$$('translationsButtons')
-			);
-			this.$$('formPopup').getHead().setHTML('Your result');
+			this.showResults();
+			this.formPopup.getHead().setHTML('Your result');
 		}
 	}
 
@@ -175,14 +159,69 @@ export default class createTestForm extends JetView {
 	}
 
 	answerAction(translation, n) {
-		if(translation.isCorrect) {
-			if(translation.partOfSpeech == 'Noun' || translation.partOfSpeech == 'Verb')  {
-				this.score = this.score + 2;
+		const wordId = this.$$('currentWordId').getValue();
+		if(translation.wordId === wordId) {
+			if(translation.partOfSpeech === 'Noun' || translation.partOfSpeech === 'Verb')  {
+				this.score += 2;
 			}
 			else {
-				this.score = this.score + 1;
+				this.score += 1;
 			}
 		}
 		this.showQuestion(++n, this.wordsList, this.translationsArr);
+	}
+
+	changeButtons(n, id, translations) {
+		webix.ui(
+			{
+				view: 'form',
+				localId: 'translationsButtons',
+				borderless: true,
+				type: 'clean',
+				elements: [
+					{
+						view: 'text',
+						localId: 'currentWordId',
+						hidden: true
+					},
+					{						
+						margin: 10,
+						padding: 10,
+						cols: this.setTranslations(translations, n)
+					}
+				]
+			},
+			this.formPopup,
+			this.$$(id)
+		);
+	}
+
+	showResults() {
+		webix.ui(
+			{
+				padding: 30,
+				margin: 15,
+				rows: [
+					{
+						template: this.score,
+						borderless: true,
+						css: 'center'
+					},
+					{
+						view: 'button',
+						value: 'Ok',
+						type: 'form',
+						width: 100,
+						click: () => {
+							this.formPopup.hide();	
+							this._parent.refresh();			
+						}
+					}
+				]
+			},
+
+			this.formPopup,
+			this.$$('translationsButtons')
+		);
 	}
 }
