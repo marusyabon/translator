@@ -3,6 +3,7 @@ const router = express.Router();
 const Group = require('../models/groups');
 const Word = require('../models/words');
 const Translation = require('../models/translations');
+const TestResult = require('../models/testresults');
 
 router.get('/', function (req, res, next) {
 	Group.aggregate([{
@@ -51,6 +52,7 @@ router.delete('/:id', async (req, res, next) => {
 		wordsTemp.forEach(word => wordIds.push(word.id));
 
 		await Translation.deleteMany({ 'wordId': wordIds });
+		await TestResult.deleteMany({ 'groupId': req.body.id });
 		const words = await Word.deleteMany({ 'groupId': req.body.id });
 
 		response.status = 'server';

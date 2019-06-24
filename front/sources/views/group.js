@@ -5,7 +5,7 @@ import createTestForm from './createTest';
 
 export default class GroupView extends JetView{
 	config() {
-	
+		const _ = this.app.getService("locale")._;
 		const dtable = {
 			view: 'datatable',
 			select: true,
@@ -47,7 +47,7 @@ export default class GroupView extends JetView{
 
 		const exportBtn = {
 			view: 'button',
-			value: 'Export words',
+			value: _('Export_words'),
 			width: 150,
 			click: () => { 
 				webix.toExcel(this.$$('wordsList'));
@@ -57,7 +57,7 @@ export default class GroupView extends JetView{
 		const testBtn = {
 			view: 'button',
 			type: 'form',
-			value: 'Test',
+			value: _('Test'),
 			width: 100,
 			click: () => { 
 				this.createTest();

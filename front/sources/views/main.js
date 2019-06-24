@@ -5,7 +5,7 @@ import addWordForm from './addWord';
 
 export default class MainView extends JetView{
 	config() {
-
+		const _ = this.app.getService("locale")._;
 		const testResults = {
 			view: 'datatable',
 			id: 'groupList',
@@ -80,7 +80,7 @@ export default class MainView extends JetView{
 		const button = {
 			view: 'button',
 			id: 'addGroup',
-			value: 'Add group',
+			value: _('Add_group'),
 			type:'form',
 			inputWidth: 100,
 			click: () => { this.addGroup.showWindow(); }
