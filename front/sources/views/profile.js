@@ -52,16 +52,24 @@ export default class ProfileView extends JetView{
 		testresults.waitData.then(() => {
 			let n = 1;
 			const recordsArr = testresults.serialize();
-			const data = recordsArr.map((record, i, recordsArr) => {
+			recordsArr.forEach((record, i, recordsArr) => {
 				if (i > 0) {
 					const prevRec = recordsArr[i - 1];
 					if (record.score > prevRec.score) {
 						n += 1;
 					}
 				}
+			});
+			const data = recordsArr.map((record, i, recordsArr) => {
+				if (i > 0) {
+					const prevRec = recordsArr[i - 1];
+					if (record.score > prevRec.score) {
+						n -= 1;
+					}
+				}
 				record.rating = n;
 				return record;
-			});
+			}).reverse();
 			this.$$('testResults').parse(data);
 		});
 	}
