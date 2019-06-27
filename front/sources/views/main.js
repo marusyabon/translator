@@ -5,7 +5,7 @@ import addWordForm from './addWord';
 
 export default class MainView extends JetView{
 	config() {
-
+		const _ = this.app.getService("locale")._;
 		const testResults = {
 			view: 'datatable',
 			id: 'groupList',
@@ -28,6 +28,12 @@ export default class MainView extends JetView{
 					minWidth: 50,
 					css: 'center',
 					header: 'Count'
+				},
+				{
+					id: 'creationDate',
+					width: 80,
+					header: 'Created',
+					format: webix.Date.dateToStr("%d %M")
 				},
 				{
 					id: 'viewCol',
@@ -74,7 +80,7 @@ export default class MainView extends JetView{
 		const button = {
 			view: 'button',
 			id: 'addGroup',
-			value: 'Add group',
+			value: _('Add_group'),
 			type:'form',
 			inputWidth: 100,
 			click: () => { this.addGroup.showWindow(); }

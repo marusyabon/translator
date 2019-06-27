@@ -3,6 +3,9 @@ import Authorization from '../authorization';
 
 export default class TopView extends JetView{
 	config(){
+		const lang = this.app.getService('locale').getLang();
+		const _ = this.app.getService('locale')._;
+
 		const header = {
 			type:'header', template:this.app.config.name, css:'webix_header app_header'
 		};
@@ -14,15 +17,15 @@ export default class TopView extends JetView{
 			template:'<span class="webix_icon #icon#"></span> #value# ',
 			value: 'Home',
 			data:[
-				{ value:'Home', id:'main', icon:'fas fa-home' },
-				{ value:'Profile', id:'profile',  icon:'fas fa-user' }
+				{ value:_('Home'), id:'main', icon:'fas fa-home' },
+				{ value:_('Profile'), id:'profile',  icon:'fas fa-user' }
 			]
 		};
 
 		const logout = {
 			view:'button', 
 			localId:'logoutBtn', 
-			value:'Logout', 
+			value:_('Logout'), 
 			type:'form'
 		};
 
@@ -31,9 +34,33 @@ export default class TopView extends JetView{
 			cols:[
 				{ paddingX:5, paddingY:10, rows: [ {css:'webix_shadow_medium', rows:[header, menu, logout]} ]},
 				{ view: 'resizer', width: 5 },
-				{ type:'wide', paddingY:10, paddingX:5, rows: [
-					{ $subview:true } 
-				]}
+				{
+					type: 'clean',
+					rows: [
+						{height: 10},
+						{
+							height: 30,
+							cols: [
+								{},
+								{
+									view: 'segmented', multiview: true, value: lang, name: 'lang',
+									width: 80,
+									options: [
+										{ id: 'en', value: 'EN', width: 40 },
+										{ id: 'ru', value: 'RU', width: 40 }
+									],
+									click: () => this.toggleLanguage(),
+								}
+							]
+						},
+						{
+							type: 'wide', paddingY: 10, paddingX: 5, rows: [
+								{ $subview: true }
+							]
+						}
+					]
+				}
+				
 			]
 		};
 
@@ -54,5 +81,12 @@ export default class TopView extends JetView{
 				}
 			});
 		});
+	}
+
+	toggleLanguage() {
+		const langs = this.app.getService('locale');
+		const button = this.getRoot().queryView({ name: 'lang' });
+		const value = button.getValue();
+		langs.setLang(value);
 	}
 }

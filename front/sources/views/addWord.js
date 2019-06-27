@@ -4,11 +4,11 @@ import { words } from 'models/words';
 
 export default class addWordForm extends JetView {
 
-	mainRow(count) {
+	mainRow(count, langs) {
 		return {
 			margin: 20,
 			cols: [
-				{ view: 'combo', label: 'Language', labelWidth: 72, labelAlign: 'right', width: 180, name: `language${count}`, options: { body: { template: '#value#', data: languages } } },
+				{ view: 'combo', label: 'Language', labelWidth: 72, labelAlign: 'right', width: 180, name: `language${count}`, options: { body: { template: '#value#', data: langs } } },
 				{ view: 'text', label: 'Translation', labelWidth: 82, labelAlign: 'right', name: `translation${count}` },
 				{
 					view: 'button',
@@ -17,12 +17,12 @@ export default class addWordForm extends JetView {
 					type: 'form',
 					width: 140,
 					click: () => {
-						this.addTranslation()
+						this.addTranslation();
 					}
 				}
 			]
-		}
-	}  
+		};
+	}
 
 	config() {
 		return {
@@ -30,17 +30,17 @@ export default class addWordForm extends JetView {
 			localId: 'addWordForm',
 			head: 'Add word',
 			width: 600,
-			position:'center',
+			position: 'center',
 			body: {
 				rows: [
 					{
 						view: 'form',
 						localId: 'wordForm',
 						elements: [
-							{ view: 'text', name: 'id', localId: 'id', hidden: true},
-							{ view: 'text', name: 'groupId', localId: 'groupId', hidden: true},
+							{ view: 'text', name: 'id', localId: 'id', hidden: true },
+							{ view: 'text', name: 'groupId', localId: 'groupId', hidden: true },
 							{
-								view: 'label', 
+								view: 'label',
 								label: 'Original word',
 								height: 24
 							},
@@ -52,19 +52,24 @@ export default class addWordForm extends JetView {
 									{ view: 'combo', label: 'POS', labelWidth: 40, labelAlign: 'right', width: 140, name: 'partOfSpeech', options: ['Noun', 'Pronoun', 'Verb', 'Adverb'] }
 								]
 							}
-						]
+						],
+						rules: {
+							'languageId': webix.rules.isNotEmpty,
+							'word': webix.rules.isNotEmpty,
+							'partOfSpeech': webix.rules.isNotEmpty,
+						}
 					},
 					{
 						view: 'form',
 						localId: 'translationsForm',
 						elements: [
-							{ view: 'text', name: 'wordId', localId: 'wordId', hidden: true},
+							{ view: 'text', name: 'wordId', localId: 'wordId', hidden: true },
 							{
 								view: 'label',
 								label: 'Translations',
 								height: 24
-							},				
-							this.mainRow(1)
+							},
+							this.mainRow(1, languages)
 						]
 					},
 					{
@@ -87,9 +92,55 @@ export default class addWordForm extends JetView {
 							{}
 						]
 					}
-				]				
-			}						
+				]
+			}
 		};
+	}
+
+	init() {
+		this.translationsForm = this.$$('translationsForm');
+		this.wordForm = this.$$('wordForm');
+		this.addWordForm = this.$$('addWordForm');
+		this.btnAddTranslation = $$('addTranslation');
+
+		const allCombo = this.findAllCombo();
+		allCombo.forEach((combo, i) => {
+			this.onComboChange(combo, i);
+		});
+	}
+
+	findAllCombo() {
+		return this.$$('addWordForm').queryView({ view: 'combo', label: 'Language' }, 'all');
+	}
+
+	onComboChange(combo, i) {	
+		combo.attachEvent('onChange', (newv, oldv) => {
+
+			//get all combo in form
+			//need  to find all combo again, in case if new was adde
+			const allCombo = this.findAllCombo();
+			const combosArr = allCombo.slice();
+			const allLangs = {...languages.data.pull};
+			//remove from array combo where caught event
+			combosArr.splice(i, 1);
+
+			//for each combo remove from options list selected value
+			
+			combosArr.forEach( el => this.setOptions(el, allLangs, newv, oldv));	
+		});
+	}
+
+	removeSelectedLangs() {
+		const allLangs = {...languages.data.pull};
+		const allCombo = this.findAllCombo();
+
+		allCombo.forEach((item) => {
+			const value = item.getValue();
+			delete allLangs[value];
+		});
+		
+		const newLangArr = Object.keys(allLangs).map((k) => allLangs[k]);
+		return newLangArr;
 	}
 
 	showWindow(id) {
@@ -101,45 +152,70 @@ export default class addWordForm extends JetView {
 	}
 
 	addTranslation() {
-		const form = this.$$('translationsForm');
-		const rows = form.getChildViews();
+		const rows = this.translationsForm.getChildViews();
 		const rowsCount = rows.length;
-		const target = rows[rowsCount-1];
+		const target = rows[rowsCount - 1];
 
-		webix.ui({ width: 140 }, target, $$('addTranslation'));
-		const count = form.getChildViews().length - 1;
-		form.addView(this.mainRow(count));		
+		webix.ui({ width: 140 }, target, this.btnAddTranslation);
+
+		const index = this.translationsForm.getChildViews().length - 1;
+		const langs = this.removeSelectedLangs();
+		this.translationsForm.addView(this.mainRow(index, langs));
+
+		const allCombo = this.findAllCombo();
+		this.onComboChange(allCombo[index], index);
 	}
 
 	saveForm() {
-		const wordForm = this.$$('wordForm');
-		let word = wordForm.getValues();
-		const translationsForm = this.$$('translationsForm');
-		
-		const count = translationsForm.getChildViews().length - 1;
-		const translationValues = translationsForm.getValues();
+		let word = this.wordForm.getValues();
+
+		const count = this.translationsForm.getChildViews().length - 1;
+		const translationValues = this.translationsForm.getValues();
 
 		let translations = [];
-		let tr = {};
+
 		for (let i = 1; i < count; i++) {
-			tr = {
+			let tr = {
 				word: translationValues[`translation${i}`],
 				languageId: translationValues[`language${i}`]
 			};
-			translations.push(tr);	
+			translations.push(tr);
 		}
 
 		const batch = {
-			word: word, 
-			translations: translations
+			word,
+			translations
+		};
+
+		if(this.wordForm.validate()) {
+			words.add(batch);
+			this.hideWindow();			
+		}
+	}
+
+	hideWindow() {
+		this.wordForm.clearValidation();
+		this.translationsForm.clearValidation();
+		this.wordForm.clear();
+		this.translationsForm.clear();
+		this.addWordForm.hide();
+	}
+
+	setOptions(el, allLangs, newv, oldv) {
+		// move to function
+		const langs = el.getList().serialize();
+
+		//return to options list value, if it was unselected
+		if(oldv) {
+			const oldVal = allLangs[oldv];
+			langs.push(oldVal);
 		}
 
-		words.add(batch);
+		const index = langs.indexOf(langs.find((item) => {return item.id === newv}));
+		langs.splice(index, 1);
 
-		wordForm.clearValidation();
-		translationsForm.clearValidation();
-		wordForm.clear();
-		translationsForm.clear();
-		this.$$('addWordForm').hide();
+		//set filtered list of languages
+		el.define('options', langs);
+		el.refresh();
 	}
 }

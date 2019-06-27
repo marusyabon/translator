@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Group = require('../models/groups');
+const Word = require('../models/words');
+const Translation = require('../models/translations');
+const TestResult = require('../models/testresults');
 
 router.get('/', function (req, res, next) {
 	Group.aggregate([{
@@ -34,17 +37,38 @@ router.post('/', function (req, res, next) {
 			response.status = 'server';
 			response.data = item;
 		}
-		res.send(response)
+		res.send(response);
 	});
 });
 
-router.delete('/:id', function (req, res, next) {
-	Group.findOneAndDelete(
-		{ _id: req.body.id },
-		(err, result) => {
-			res.send(result);
+router.delete('/:id', async (req, res, next) => {
+	try {
+		const response = {};
+
+		const group = await Group.findOneAndDelete({ _id: req.body.id });
+		const wordsTemp = await Word.find({ 'groupId': req.body.id });
+
+		const wordIds = [];
+		wordsTemp.forEach(word => wordIds.push(word.id));
+
+		await Translation.deleteMany({ 'wordId': wordIds });
+		await TestResult.deleteMany({ 'groupId': req.body.id });
+		const words = await Word.deleteMany({ 'groupId': req.body.id });
+
+		response.status = 'server';
+		response.group = group;
+		response.words = words; 
+
+		res.send(response);
+
+	} catch(err) {
+		const response = {};
+		if (err) {
+			response.status = 'error';
+			response.data = err;
+			res.send(response);
 		}
-	);
+	}
 });
 
 module.exports = router;

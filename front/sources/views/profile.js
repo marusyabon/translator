@@ -1,28 +1,35 @@
 import {JetView} from 'webix-jet';
+import { testresults } from 'models/testresults';
 
 export default class ProfileView extends JetView{
 	config() {
 
 		const testResults = {
 			view: 'datatable',
+			localId: 'testResults',
 			columns:[
 				{ 
-					id: 'date',
-					header: 'Date',
-					fillspace: 1,
-					minWidth: 120
+					id: 'rating',    
+					header: 'Rating',    
+					minWidth: 80
 				},
 				{ 
 					id: 'groupId',   
 					header: 'Group',
+					template: '#groupId.groupName#',
 					fillspace: 1,
 					minWidth: 120
 				},
 				{ 
-					id:' score',    
+					id: 'score',    
 					header: 'Result',    
-					fillspace: 1,
-					minWidth: 120
+					minWidth: 80
+				},
+				{ 
+					id: 'passedDate',
+					header: 'Date',
+					format: webix.Date.dateToStr("%d %M"),
+					width: 80
 				}
 			],
 			data: []
@@ -39,5 +46,31 @@ export default class ProfileView extends JetView{
 		return { 
 			rows: [testResults, button]
 		};
+	}
+
+	init() {
+		testresults.waitData.then(() => {
+			let n = 1;
+			const recordsArr = testresults.serialize();
+			recordsArr.forEach((record, i, recordsArr) => {
+				if (i > 0) {
+					const prevRec = recordsArr[i - 1];
+					if (record.score > prevRec.score) {
+						n += 1;
+					}
+				}
+			});
+			const data = recordsArr.map((record, i, recordsArr) => {
+				if (i > 0) {
+					const prevRec = recordsArr[i - 1];
+					if (record.score > prevRec.score) {
+						n -= 1;
+					}
+				}
+				record.rating = n;
+				return record;
+			}).reverse();
+			this.$$('testResults').parse(data);
+		});
 	}
 }

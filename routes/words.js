@@ -19,64 +19,65 @@ router.get('/', function (req, res, next) {
 		});
 
 		res.send(data);
-	});;
+	});
 });
 
-router.post('/', function (req, res, next) {
+router.post('/', async (req, res, next) => {
 	let word = JSON.parse(req.body.word);
 	word = new Word(word);
 
 	const translations = JSON.parse(req.body.translations);
 
-	word.save((err, item) => {
+	try {
+		const item = await word.save();
+		const response = {};
+		const arr = [];
+
+		translations.forEach((tr) => {
+			tr.wordId = item._id;
+			arr.push(tr);
+		});
+
+		const words = await Translation.insertMany(arr);
+
+		response.status = 'server';
+		response.data = {
+			word: item,
+			translations: words
+		};
+
+		res.send(response);
+	} catch(err) {
 		const response = {};
 		if (err) {
 			response.status = 'error';
-			res.send(response)
+			response.data = err;
+			res.send(response);
 		}
-		else {
-			const arr = [];
-			translations.forEach((tr) => {
-				tr.wordId = item._id;
-				arr.push(tr);
-			});
-
-			Translation.insertMany(arr, (err, words) => {
-				if (err) {
-					response.status = 'error';
-				}
-				else {
-					response.status = 'server';
-					response.data = {
-						word: item,
-						translations: words
-					};
-				}
-				res.send(response)				
-			});
-		}
-	});
+	}
 });
 
-router.delete('/:id', function (req, res, next) {
-	Word.findOneAndDelete(
-		{ _id: req.body.id },
-		(err, result) => {
-			const response = {};
+router.delete('/:id', async (req, res, next) => {
+	try {
+		const response = {};
 
-			if (!err) {
-				response.word = result;
-				Translation.deleteMany({ 'wordId': req.body.id },
-					(err, result) => {
-						if (!err) {
-							response.translations = result;
-						}
-						res.send(response)
-					}
-				);
-			}
+		const word = await Word.findOneAndDelete({ _id: req.body.id });
+		const translations = await Translation.deleteMany({ 'wordId': req.body.id });
+
+		response.status = 'server';
+		response.word = word; 
+		response.translations = translations;
+
+		res.send(response);
+
+	} catch(err) {
+		const response = {};
+		if (err) {
+			response.status = 'error';
+			response.data = err;
+			res.send(response);
 		}
-	);
+	}
 });
 
 module.exports = router;

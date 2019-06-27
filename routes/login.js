@@ -16,7 +16,7 @@ router.post('/', (req, res) => {
 			/** This is what ends up in our JWT */
 			const payload = {
 				username: user.username,
-				expires: Date.now() + 1080000,
+				expires: Date.now() + 10800000,
 			};
 
 			/** assigns payload to req.user */
